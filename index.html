@@ -1,35 +1,9 @@
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-
-<script>
-Pi.init({ version: "2.0" });
-
-async function login() {
-  try {
-    const scopes = ['username', 'payments'];
-
-    const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-
-    alert("Welcome " + auth.user.username);
-
-  } catch (e) {
-    alert("Login failed");
-  }
-}
-
-function onIncompletePaymentFound(payment) {
-  console.log("Incomplete payment:", payment);
-}
-
-async function pay() {
-  try {
-    await Pi.createPayment({
-      amount: 0.01,
-      memo: "Funds Test Payment",
-      metadata: { type: "test" }
-    });
-    alert("Payment started");
-  } catch (e) {
-    alert("Payment error");
-  }
-}
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Page</title>
+</head>
+<body>
+  <h1>It is working 🎉</h1>
+</body>
+</html>
