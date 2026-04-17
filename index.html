@@ -141,15 +141,36 @@ Pi.init({ version: "2.0" });
 
 async function login() {
   try {
-    const user = await Pi.authenticate(['payments']);
-    alert("Logged in!");
-    console.log(user);
+    const scopes = ['username', 'payments'];
+
+    const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+
+    alert("Welcome " + auth.user.username);
+
+    console.log("User:", auth.user);
+
   } catch (e) {
     alert("Login failed");
   }
 }
 
+function onIncompletePaymentFound(payment) {
+  console.log("Incomplete payment:", payment);
+}
+
 async function pay() {
+  try {
+    await Pi.createPayment({
+      amount: 0.01,
+      memo: "Funds Test Payment",
+      metadata: { type: "test" }
+    });
+    alert("Payment started");
+  } catch (e) {
+    alert("Payment error");
+  }
+}
+</script>
   try {
     await Pi.createPayment({
       amount: 0.01,
