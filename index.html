@@ -1,61 +1,65 @@
-<style>
-body {
-  font-family: Arial;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: white;
-  margin: 0;
-  padding: 20px;
+<body>
+
+<div class="container">
+
+  <h2>💰 Demo Wallet</h2>
+
+  <div id="login" class="card">
+    <h3>Login</h3>
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div id="app" class="card hidden">
+    <h3>Welcome, <span id="name"></span></h3>
+
+    <h2>Balance</h2>
+    <div class="balance">$<span id="balance">1000</span></div>
+
+    <input id="sendUser" placeholder="Send to user">
+    <input id="amount" placeholder="Amount">
+
+    <button onclick="send()">Send</button>
+
+    <h4>Transactions</h4>
+    <div id="history"></div>
+
+    <button style="background:red" onclick="logout()">Logout</button>
+  </div>
+
+</div>
+
+<script>
+let balance = 1000;
+
+function login() {
+  let user = document.getElementById("user").value;
+  if(!user) return alert("Enter username");
+
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("name").innerText = user;
 }
 
-.container {
-  max-width: 420px;
-  margin: auto;
+function send() {
+  let user = document.getElementById("sendUser").value;
+  let amount = parseInt(document.getElementById("amount").value);
+
+  if(!user || !amount) return alert("Fill all fields");
+  if(amount > balance) return alert("Not enough balance");
+
+  balance -= amount;
+  document.getElementById("balance").innerText = balance;
+
+  let div = document.createElement("div");
+  div.innerHTML = `Sent $${amount} to ${user}`;
+  document.getElementById("history").appendChild(div);
 }
 
-.card {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  padding: 20px;
-  border-radius: 16px;
-  margin-top: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+function logout() {
+  location.reload();
 }
+</script>
 
-input, button {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 10px;
-  border: none;
-  font-size: 16px;
-}
-
-input {
-  background: #0b1220;
-  color: white;
-}
-
-button {
-  background: #22c55e;
-  color: white;
-  font-weight: bold;
-}
-
-button:hover {
-  background: #16a34a;
-}
-
-h2, h3 {
-  margin: 10px 0;
-}
-
-.balance {
-  font-size: 28px;
-  font-weight: bold;
-  color: #38bdf8;
-}
-
-.hidden {
-  display: none;
-}
-</style>
+</body>
