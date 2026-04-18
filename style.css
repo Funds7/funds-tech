@@ -1,11 +1,21 @@
 body {
   font-family: Arial;
-  text-align: center;
-  background: #111;
+  background: #0b0f1a;
   color: white;
+  text-align: center;
 }
 
 button {
-  padding: 10px;
+  padding: 10px 20px;
   margin: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+h2 {
+  color: #00ff99;
 }
