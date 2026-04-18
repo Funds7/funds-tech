@@ -1,14 +1,24 @@
 let balance = 1000;
+let trades = [];
 
 function buy() {
-  balance -= 100;
-  addTrade("BUY", 100);
+  let amount = 100;
+
+  if (balance < amount) {
+    alert("Not enough balance");
+    return;
+  }
+
+  balance -= amount;
+  addTrade("BUY", amount);
   updateUI();
 }
 
 function sell() {
-  balance += 100;
-  addTrade("SELL", 100);
+  let amount = 100;
+
+  balance += amount;
+  addTrade("SELL", amount);
   updateUI();
 }
 
@@ -17,7 +27,25 @@ function updateUI() {
 }
 
 function addTrade(type, amount) {
-  const li = document.createElement("li");
-  li.innerText = type + " $" + amount;
-  document.getElementById("trades").appendChild(li);
+  const time = new Date().toLocaleTimeString();
+
+  const trade = {
+    type,
+    amount,
+    time
+  };
+
+  trades.unshift(trade);
+  renderTrades();
+}
+
+function renderTrades() {
+  const list = document.getElementById("trades");
+  list.innerHTML = "";
+
+  trades.forEach(t => {
+    const li = document.createElement("li");
+    li.innerText = `${t.type} $${t.amount} - ${t.time}`;
+    list.appendChild(li);
+  });
 }
