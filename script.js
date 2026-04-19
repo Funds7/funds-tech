@@ -8,16 +8,30 @@ function logout() {
   document.getElementById("app").style.display = "none";
 }
 
+let balance = 1000;
+
+function updateBalance() {
+  document.querySelector(".balance-card h1").innerText = "$" + balance.toFixed(2);
+}
+
 function buy() {
-  addTrade("BUY $100");
+  let amount = 50;
+  balance -= amount;
+
+  addTrade("BUY", amount);
+  updateBalance();
 }
 
 function sell() {
-  addTrade("SELL $100");
+  let amount = 50;
+  balance += amount;
+
+  addTrade("SELL", amount);
+  updateBalance();
 }
 
-function addTrade(text) {
-  const li = document.createElement("li");
-  li.innerText = text + " - " + new Date().toLocaleTimeString();
+function addTrade(type, amount) {
+  let li = document.createElement("li");
+  li.innerText = type + " $" + amount + " - " + new Date().toLocaleTimeString();
   document.getElementById("trades").appendChild(li);
 }
