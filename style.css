@@ -1,11 +1,11 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #0b0f1a;
+  background: linear-gradient(135deg, #0b0f1a, #1a2238);
   color: white;
 }
 
-/* This fixes the "small app" problem */
+/* Main container */
 .container {
   max-width: 420px;
   margin: auto;
@@ -14,29 +14,42 @@ body {
   box-sizing: border-box;
 }
 
+/* GLASS CARD */
+#loginScreen, #app {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  margin-top: 40px;
+}
+
 /* Inputs */
 input {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
-  border-radius: 8px;
+  margin-top: 12px;
+  border-radius: 10px;
   border: none;
+  background: rgba(255,255,255,0.1);
+  color: white;
 }
 
 /* Buttons */
 button {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
-  border-radius: 8px;
+  margin-top: 12px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
-  background: #1e90ff;
+  background: linear-gradient(135deg, #1e90ff, #00c6ff);
   color: white;
   font-weight: bold;
 }
 
-/* Optional: clean headings */
+/* Headings */
 h1, h2, h3 {
   text-align: center;
 }
