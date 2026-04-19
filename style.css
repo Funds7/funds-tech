@@ -1,8 +1,8 @@
 body {
   margin: 0;
-  font-family: Arial;
-  background: #0a0f1c;
-  color: white;
+  font-family: Arial, sans-serif;
+  background: #070b14;
+  color: #fff;
 }
 
 /* LAYOUT */
@@ -13,58 +13,69 @@ body {
 
 /* SIDEBAR */
 .sidebar {
-  width: 220px;
-  background: #0f172a;
+  width: 240px;
+  background: #0d1424;
   padding: 20px;
+  border-right: 1px solid #1f2a44;
 }
 
 .sidebar h2 {
   color: #22c55e;
+  margin-bottom: 20px;
+}
+
+.sidebar .user {
+  color: #aaa;
+  margin-bottom: 20px;
 }
 
 .sidebar button {
-  margin-top: 20px;
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   background: #ef4444;
   border: none;
   color: white;
-  border-radius: 8px;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-/* MAIN AREA */
+/* MAIN */
 .main {
   flex: 1;
   padding: 20px;
-}
-
-/* TOP GRID */
-.grid {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+  overflow-y: auto;
 }
 
 /* CARDS */
 .card {
-  background: #111827;
+  background: #0f172a;
   padding: 20px;
-  border-radius: 12px;
-  flex: 1;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  border: 1px solid #1f2a44;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
 }
 
+/* GRID */
+.grid {
+  display: flex;
+  gap: 20px;
+}
+
+/* BALANCE */
 .card h1 {
   color: #22c55e;
+  font-size: 32px;
 }
 
-/* TRADE SECTION */
+/* TRADE INPUT */
 .trade input {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
-  border-radius: 8px;
-  border: none;
-  background: #1f2937;
+  border-radius: 10px;
+  border: 1px solid #1f2a44;
+  background: #0b1220;
   color: white;
 }
 
@@ -79,9 +90,9 @@ button {
   flex: 1;
   padding: 12px;
   border: none;
-  border-radius: 8px;
-  color: white;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: bold;
 }
 
 .buy {
@@ -99,6 +110,13 @@ ul {
 }
 
 li {
-  padding: 8px;
-  border-bottom: 1px solid #1f2937;
+  padding: 10px;
+  border-bottom: 1px solid #1f2a44;
+  color: #ddd;
+}
+
+/* LIVE PRICE TEXT */
+.card p {
+  font-size: 16px;
+  color: #bbb;
 }
