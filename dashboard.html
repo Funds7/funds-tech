@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="container">
+
+  <div class="card">
+    <h2>Welcome, <span id="user"></span></h2>
+    <h3>Balance: $<span id="balance">1000</span></h3>
+  </div>
+
+  <div class="card">
+    <h3>Trade</h3>
+    <input id="amount" placeholder="Amount">
+    <button onclick="buy()">Buy</button>
+    <button onclick="sell()">Sell</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="card">
+    <h3>History</h3>
+    <ul id="history"></ul>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
