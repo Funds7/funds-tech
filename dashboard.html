@@ -7,12 +7,13 @@
 
 <body>
 
-<div class="app">
+<div class="layout">
 
   <!-- SIDEBAR -->
   <div class="sidebar">
     <h2>⚡ ProWallet</h2>
-    <p id="user">User</p>
+
+    <p class="user">User: <span id="user">-</span></p>
 
     <button onclick="logout()">Logout</button>
   </div>
@@ -20,18 +21,28 @@
   <!-- MAIN -->
   <div class="main">
 
-    <!-- TOP CARD -->
-    <div class="card top">
-      <h3>Balance</h3>
-      <h1>$<span id="balance">0</span></h1>
+    <!-- TOP CARDS -->
+    <div class="grid">
+
+      <div class="card">
+        <h3>Balance</h3>
+        <h1>$<span id="balance">0</span></h1>
+      </div>
+
+      <div class="card">
+        <h3>Market Status</h3>
+        <p>Live Demo Trading</p>
+      </div>
+
     </div>
 
-    <!-- TRADE SECTION -->
-    <div class="card">
+    <!-- TRADE BOX -->
+    <div class="card trade">
       <h3>Trade</h3>
+
       <input id="amount" placeholder="Enter amount">
 
-      <div class="btns">
+      <div class="buttons">
         <button class="buy" onclick="buy()">BUY</button>
         <button class="sell" onclick="sell()">SELL</button>
       </div>
@@ -48,6 +59,5 @@
 </div>
 
 <script src="app.js"></script>
-
 </body>
 </html>
