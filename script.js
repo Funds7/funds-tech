@@ -1,77 +1,78 @@
 let balance = 1000;
-let position = 0; // how much asset user holds
-let entryPrice = 0;
-
-// Simulated market price
+let position = null; // {price, amount}
 let price = 100;
 
-// start price movement
+// ===== LIVE MARKET ENGINE =====
 setInterval(() => {
-  let change = (Math.random() - 0.5) * 2; // random up/down
+  let change = (Math.random() - 0.5) * 3;
   price += change;
 
   if (price < 1) price = 1;
 
-  updateMarketUI();
-  updateBalance();
-}, 2000);
+  updateUI();
+}, 1500);
 
+// ===== LOGIN =====
 function login() {
   document.getElementById("loginScreen").style.display = "none";
   document.getElementById("app").style.display = "block";
 
-  updateBalance();
-  updateMarketUI();
+  updateUI();
 }
 
-function logout() {
-  document.getElementById("loginScreen").style.display = "block";
-  document.getElementById("app").style.display = "none";
-}
-
-// BUY = enter position at current price
+// ===== BUY =====
 function buy() {
-  if (balance <= 0) return;
+  if (position) return; // only 1 position for simplicity
 
-  position = 1;
-  entryPrice = price;
+  let amount = 1; // 1 unit asset
+  let cost = price * amount;
+
+  if (balance < cost) return;
+
+  balance -= cost;
+  position = { price, amount };
 
   addTrade("BUY", price);
-  updateBalance();
+
+  updateUI();
 }
 
-// SELL = close position
+// ===== SELL =====
 function sell() {
-  if (position === 0) return;
+  if (!position) return;
 
-  let profit = (price - entryPrice) * 10; // multiplier effect
-  balance += profit;
+  let profit = (price - position.price) * position.amount;
+  balance += (position.price * position.amount) + profit;
 
   addTrade("SELL", price + " | P/L: $" + profit.toFixed(2));
 
-  position = 0;
-  entryPrice = 0;
+  position = null;
 
-  updateBalance();
+  updateUI();
 }
 
-// update balance display
-function updateBalance() {
+// ===== UI UPDATE =====
+function updateUI() {
   document.querySelector(".balance-card h1").innerText =
     "$" + balance.toFixed(2);
+
+  let priceEl = document.getElementById("price");
+  priceEl.innerText = "$" + price.toFixed(2);
+
+  // color effect (pro feel)
+  if (position) {
+    let pnl = (price - position.price);
+    priceEl.style.color = pnl >= 0 ? "#00c853" : "#ff3d00";
+  } else {
+    priceEl.style.color = "white";
+  }
 }
 
-// show live market price
-function updateMarketUI() {
-  document.querySelector(".profit").innerText =
-    "Market Price: $" + price.toFixed(2);
-}
-
-// trade history
+// ===== TRADE LOG =====
 function addTrade(type, info) {
   let li = document.createElement("li");
   li.innerText =
-    type + " → " + info + " - " + new Date().toLocaleTimeString();
+    type + " → " + info + " • " + new Date().toLocaleTimeString();
 
   document.getElementById("trades").appendChild(li);
 }
