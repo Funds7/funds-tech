@@ -78,21 +78,19 @@ async function loadPrices() {
     let res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
     let data = await res.json();
 
-    if(document.getElementById("btc")){
-      document.getElementById("btc").innerText = data.bitcoin.usd;
-    }
+    let btcEl = document.getElementById("btc");
+    let ethEl = document.getElementById("eth");
 
-    if(document.getElementById("eth")){
-      document.getElementById("eth").innerText = data.ethereum.usd;
-    }
+    if(btcEl) btcEl.innerText = data.bitcoin.usd;
+    if(ethEl) ethEl.innerText = data.ethereum.usd;
 
   } catch (err) {
-    console.log("Price error", err);
+    console.log("Price error:", err);
   }
 }
 
-// run safely only on dashboard
-if(document.getElementById("btc")){
+// wait for page to fully load
+window.addEventListener("load", () => {
   loadPrices();
   setInterval(loadPrices, 10000);
-}
+});
