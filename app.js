@@ -13,7 +13,6 @@ function login() {
 // ===================== DASHBOARD =====================
 let user = localStorage.getItem("user");
 
-// safer check (NOT relying on URL)
 if(document.getElementById("balance")) {
 
   if(!user){
@@ -22,10 +21,9 @@ if(document.getElementById("balance")) {
 
   document.getElementById("user").innerText = user;
 
-  // SAFE BALANCE FIX (prevents NaN)
   let balance = localStorage.getItem(user+"_balance");
 
-  if(balance === null || balance === "undefined" || isNaN(balance)){
+  if(!balance || isNaN(balance)){
     balance = 1000;
   }
 
@@ -46,15 +44,8 @@ if(document.getElementById("balance")) {
   window.buy = function(){
     let amt = parseFloat(document.getElementById("amount").value);
 
-    if(isNaN(amt) || amt <= 0){
-      alert("Enter valid amount");
-      return;
-    }
-
-    if(amt > balance){
-      alert("Not enough balance");
-      return;
-    }
+    if(isNaN(amt) || amt <= 0) return alert("Enter valid amount");
+    if(amt > balance) return alert("Not enough balance");
 
     balance -= amt;
     document.getElementById("balance").innerText = balance;
@@ -66,10 +57,7 @@ if(document.getElementById("balance")) {
   window.sell = function(){
     let amt = parseFloat(document.getElementById("amount").value);
 
-    if(isNaN(amt) || amt <= 0){
-      alert("Enter valid amount");
-      return;
-    }
+    if(isNaN(amt) || amt <= 0) return alert("Enter valid amount");
 
     balance += amt;
     document.getElementById("balance").innerText = balance;
@@ -82,4 +70,29 @@ if(document.getElementById("balance")) {
     localStorage.removeItem("user");
     window.location.href = "index.html";
   }
+}
+
+// ===================== LIVE PRICES =====================
+async function loadPrices() {
+  try {
+    let res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
+    let data = await res.json();
+
+    if(document.getElementById("btc")){
+      document.getElementById("btc").innerText = data.bitcoin.usd;
+    }
+
+    if(document.getElementById("eth")){
+      document.getElementById("eth").innerText = data.ethereum.usd;
+    }
+
+  } catch (err) {
+    console.log("Price error", err);
+  }
+}
+
+// run safely only on dashboard
+if(document.getElementById("btc")){
+  loadPrices();
+  setInterval(loadPrices, 10000);
 }
