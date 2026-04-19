@@ -1,75 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dashboard</title>
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
-<body style="background:#0f172a; color:white; text-align:center;">
+<body>
+<div class="container">
+  <div class="card">
+    <h2>Login</h2>
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
+</div>
 
-<h1>Pro Wallet</h1>
-<h3>Welcome <span id="user"></span></h3>
-
-<h2>Balance: $<span id="balance">1000</span></h2>
-
-<input id="amount" placeholder="Amount"><br><br>
-
-<button onclick="buy()">Buy</button>
-<button onclick="sell()">Sell</button>
-<button onclick="logout()">Logout</button>
-
-<h3>History</h3>
-<ul id="history"></ul>
-
-<script>
-let user = localStorage.getItem("user");
-
-if(!user){
-  window.location.href = "index.html";
-}
-
-document.getElementById("user").innerText = user;
-
-let balance = localStorage.getItem(user+"_balance") || 1000;
-balance = parseFloat(balance);
-
-document.getElementById("balance").innerText = balance;
-
-function save(){
-  localStorage.setItem(user+"_balance", balance);
-}
-
-function addHistory(text){
-  let li = document.createElement("li");
-  li.innerText = text;
-  document.getElementById("history").appendChild(li);
-}
-
-function buy(){
-  let amt = parseFloat(document.getElementById("amount").value);
-  if(amt > balance) return alert("Not enough balance");
-
-  balance -= amt;
-  document.getElementById("balance").innerText = balance;
-
-  addHistory("BUY $" + amt);
-  save();
-}
-
-function sell(){
-  let amt = parseFloat(document.getElementById("amount").value);
-
-  balance += amt;
-  document.getElementById("balance").innerText = balance;
-
-  addHistory("SELL $" + amt);
-  save();
-}
-
-function logout(){
-  localStorage.removeItem("user");
-  window.location.href = "index.html";
-}
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
