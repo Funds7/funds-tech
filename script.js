@@ -1,129 +1,141 @@
-// ================= STATE =================
-let state = JSON.parse(localStorage.getItem("wallet")) || {
-  usd: 1000,
-  btc: 0,
-  eth: 0,
-  btcPrice: 76000,
-  ethPrice: 2300,
-  history: []
-};
+let prices = { BTC: 76000, ETH: 2300 };
+let priceInterval, portfolioInterval;
 
-const START = 1000;
+// ================= START APP =================
+window.addEventListener("load", () => {
+  const user = localStorage.getItem("user");
 
-// ================= INIT =================
-document.getElementById("user").innerText = "DemoUser";
+  if (user) {
+    showApp();
+  }
+});
 
-// ================= CHART =================
-function loadChart(){
-  new TradingView.widget({
-    container_id: "chartContainer",
-    symbol: "BINANCE:BTCUSDT",
-    interval: "1",
-    theme: "dark",
-    style: "1",
-    locale: "en",
-    hide_side_toolbar: true,
-    allow_symbol_change: false,
-    width: "100%",
-    height: 350
-  });
+// ================= LOGIN =================
+function login() {
+  const u = document.getElementById("username").value;
+  const p = document.getElementById("password").value;
+
+  if (!u || !p) return alert("Enter login details");
+
+  localStorage.setItem("user", u);
+
+  if (!localStorage.getItem("usd")) {
+    localStorage.setItem("usd", "1000");
+    localStorage.setItem("btc", "0");
+    localStorage.setItem("eth", "0");
+  }
+
+  showApp();
 }
 
-// ================= SAVE =================
-function save(){
-  localStorage.setItem("wallet", JSON.stringify(state));
+// ================= SHOW APP =================
+function showApp() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  document.getElementById("user").innerText = localStorage.getItem("user");
+
+  clearInterval(priceInterval);
+  clearInterval(portfolioInterval);
+
+  priceInterval = setInterval(updatePrices, 4000);
+  portfolioInterval = setInterval(updatePortfolio, 2000);
+
+  loadChat();
+  updatePortfolio();
 }
 
-// ================= PRICE SIMULATION =================
-function updatePrices(){
-  state.btcPrice += (Math.random()-0.5)*250;
-  state.ethPrice += (Math.random()-0.5)*15;
-
-  document.getElementById("btc").innerText = state.btcPrice.toFixed(2);
-  document.getElementById("eth").innerText = state.ethPrice.toFixed(2);
-
-  document.getElementById("lastUpdate").innerText =
-    "Last Update: " + new Date().toLocaleTimeString();
+// ================= LOGOUT (CLEAN RESET) =================
+function logout() {
+  localStorage.removeItem("user");
+  clearInterval(priceInterval);
+  clearInterval(portfolioInterval);
+  location.reload();
 }
 
-// ================= BUY =================
-function buy(){
-  let amt = parseFloat(document.getElementById("amount").value);
-  if(!amt) return;
+// ================= PRICES =================
+function updatePrices() {
+  prices.BTC += (Math.random() - 0.5) * 250;
+  prices.ETH += (Math.random() - 0.5) * 15;
 
-  if(amt > state.usd) return alert("Not enough USD");
+  document.getElementById("btcPrice").innerText =
+    "BTC: $" + prices.BTC.toFixed(2);
 
-  let btc = amt / state.btcPrice;
-
-  state.usd -= amt;
-  state.btc += btc;
-
-  state.history.unshift(`BUY $${amt} BTC @ ${state.btcPrice.toFixed(2)}`);
-
-  save();
-  render();
+  document.getElementById("ethPrice").innerText =
+    "ETH: $" + prices.ETH.toFixed(2);
 }
 
-// ================= SELL =================
-function sell(){
-  let amt = parseFloat(document.getElementById("amount").value);
-  if(!amt) return;
+// ================= PORTFOLIO SAFE =================
+function updatePortfolio() {
+  let usd = Number(localStorage.getItem("usd") || 0);
+  let btc = Number(localStorage.getItem("btc") || 0);
+  let eth = Number(localStorage.getItem("eth") || 0);
 
-  let btc = amt / state.btcPrice;
+  let total = usd + btc * prices.BTC + eth * prices.ETH;
 
-  if(btc > state.btc) return alert("Not enough BTC");
+  if (!isFinite(total)) total = 0;
 
-  state.usd += amt;
-  state.btc -= btc;
-
-  state.history.unshift(`SELL $${amt} BTC @ ${state.btcPrice.toFixed(2)}`);
-
-  save();
-  render();
+  document.getElementById("balance").innerText = usd.toFixed(2);
+  document.getElementById("btcHold").innerText = btc.toFixed(6);
+  document.getElementById("ethHold").innerText = eth.toFixed(6);
+  document.getElementById("totalValue").innerText = total.toFixed(2);
 }
 
-// ================= CALC =================
-function total(){
-  return state.usd + (state.btc * state.btcPrice);
+// ================= TRADE SAFE =================
+function buy() {
+  let amt = Number(document.getElementById("amount").value);
+  if (amt <= 0) return;
+
+  let usd = Number(localStorage.getItem("usd") || 0);
+  let btc = Number(localStorage.getItem("btc") || 0);
+
+  if (amt > usd) return alert("Not enough USD");
+
+  usd -= amt;
+  btc += amt / prices.BTC;
+
+  localStorage.setItem("usd", usd);
+  localStorage.setItem("btc", btc);
+
+  updatePortfolio();
 }
 
-function pl(){
-  let diff = total() - START;
-  let pct = (diff/START)*100;
-  return `${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
+function sell() {
+  let amt = Number(document.getElementById("amount").value);
+  if (amt <= 0) return;
+
+  let btc = Number(localStorage.getItem("btc") || 0);
+  let usd = Number(localStorage.getItem("usd") || 0);
+
+  let btcAmt = amt / prices.BTC;
+
+  if (btcAmt > btc) return alert("Not enough BTC");
+
+  btc -= btcAmt;
+  usd += amt;
+
+  localStorage.setItem("btc", btc);
+  localStorage.setItem("usd", usd);
+
+  updatePortfolio();
 }
 
-// ================= RENDER =================
-function render(){
+// ================= CHAT =================
+function sendMsg() {
+  let msg = document.getElementById("msg").value;
+  if (!msg) return;
 
-  document.getElementById("balance").innerText = state.usd.toFixed(2);
+  let chat = JSON.parse(localStorage.getItem("chat") || "[]");
+  chat.push(msg);
 
-  document.getElementById("usd").innerText = state.usd.toFixed(2);
-  document.getElementById("btc_hold").innerText = state.btc.toFixed(6);
-  document.getElementById("eth_hold").innerText = state.eth.toFixed(6);
+  localStorage.setItem("chat", JSON.stringify(chat));
+  document.getElementById("msg").value = "";
 
-  document.getElementById("total").innerText = total().toFixed(2);
-  document.getElementById("pl").innerText = "P/L: $" + pl();
-
-  let h = document.getElementById("history");
-  h.innerHTML = "";
-
-  state.history.slice(0,10).forEach(t=>{
-    let li = document.createElement("li");
-    li.innerText = t;
-    h.appendChild(li);
-  });
-
-  save();
+  loadChat();
 }
 
-// ================= LOOP =================
-setInterval(()=>{
-  updatePrices();
-  render();
-}, 2000);
-
-// ================= START =================
-loadChart();
-render();
-updatePrices();
+function loadChat() {
+  let chat = JSON.parse(localStorage.getItem("chat") || "[]");
+  document.getElementById("chat").innerHTML =
+    chat.map(m => "💬 " + m).join("<br>");
+}
