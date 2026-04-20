@@ -21,7 +21,7 @@ window.addEventListener("load", () => {
     return;
   }
 
-  // ✅ ADD HELPERS HERE (CLEAN ZONE)
+  // ===== HELPERS =====
   function animateValue(el, start, end, duration = 400) {
     if (!el) return;
 
@@ -35,31 +35,46 @@ window.addEventListener("load", () => {
 
       el.innerText = value.toFixed(2);
 
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
+      if (progress < 1) requestAnimationFrame(step);
     }
 
     requestAnimationFrame(step);
   }
 
-  // ===== USER DISPLAY =====
+  function animatePrice(el, newValue) {
+    if (!el) return;
+
+    el.classList.add("flash-up");
+    el.innerText = newValue;
+
+    setTimeout(() => {
+      el.classList.remove("flash-up");
+    }, 250);
+  }
+
+  function updateTime() {
+    const el = document.getElementById("lastUpdate");
+    if (!el) return;
+
+    el.innerText = "Last Update: " + new Date().toLocaleTimeString();
+  }
+
+  // ===== USER =====
   const userEl = document.getElementById("user");
   if (userEl) userEl.innerText = user;
 
-  // ===== LOAD DATA =====
+  // ===== DATA =====
   let usd = parseFloat(localStorage.getItem(user + "_usd")) || 1000;
   let btc = parseFloat(localStorage.getItem(user + "_btc")) || 0;
   let eth = parseFloat(localStorage.getItem(user + "_eth")) || 0;
 
-  // ===== FIXED INITIAL =====
   let initial = parseFloat(localStorage.getItem(user + "_initial"));
   if (!initial || isNaN(initial)) {
     initial = 1000;
     localStorage.setItem(user + "_initial", initial);
   }
 
-  // ===== TRADE COOLDOWN =====
+  // ===== COOLDOWN =====
   let lastTradeTime = 0;
 
   function canTrade() {
@@ -79,19 +94,18 @@ window.addEventListener("load", () => {
     localStorage.setItem(user + "_eth", eth);
   }
 
-  // ===== UI UPDATE =====
+  // ===== UI =====
   function updateUI() {
-  const balance = document.getElementById("balance");
-  const usdEl = document.getElementById("usd");
+    const balance = document.getElementById("balance");
+    const usdEl = document.getElementById("usd");
+    const btcHold = document.getElementById("btc_hold");
+    const ethHold = document.getElementById("eth_hold");
 
-  if (balance) animateValue(balance, parseFloat(balance.innerText || 0), usd);
-  if (usdEl) animateValue(usdEl, parseFloat(usdEl.innerText || 0), usd);
+    if (balance) animateValue(balance, parseFloat(balance.innerText || 0), usd);
+    if (usdEl) animateValue(usdEl, parseFloat(usdEl.innerText || 0), usd);
 
-  const btcHold = document.getElementById("btc_hold");
-  const ethHold = document.getElementById("eth_hold");
-
-  if (btcHold) btcHold.innerText = btc.toFixed(6);
-  if (ethHold) ethHold.innerText = eth.toFixed(6);
+    if (btcHold) btcHold.innerText = btc.toFixed(6);
+    if (ethHold) ethHold.innerText = eth.toFixed(6);
   }
 
   // ===== HISTORY =====
@@ -102,15 +116,6 @@ window.addEventListener("load", () => {
     let li = document.createElement("li");
     li.innerText = text;
     history.appendChild(li);
-  }
-
-  // ===== TIME (FIXED) =====
-  function updateTime() {
-    const el = document.getElementById("lastUpdate");
-    if (!el) return;
-
-    const now = new Date();
-    el.innerText = "Last Update: " + now.toLocaleTimeString();
   }
 
   // ===== PRICES =====
@@ -144,15 +149,15 @@ window.addEventListener("load", () => {
       btcPrice = data.bitcoin.usd;
       ethPrice = data.ethereum.usd;
 
-      let btcEl = document.getElementById("btc");
-      let ethEl = document.getElementById("eth");
+      const btcEl = document.getElementById("btc");
+      const ethEl = document.getElementById("eth");
 
-      if (btcEl) btcEl.innerText = btcPrice;
-      if (ethEl) ethEl.innerText = ethPrice;
+      if (btcEl) animatePrice(btcEl, btcPrice);
+      if (ethEl) animatePrice(ethEl, ethPrice);
 
       let total = usd + (btc * btcPrice) + (eth * ethPrice);
 
-      let totalEl = document.getElementById("total");
+      const totalEl = document.getElementById("total");
       if (totalEl) totalEl.innerText = total.toFixed(2);
 
       updateUI();
@@ -222,8 +227,7 @@ window.addEventListener("load", () => {
   updatePL();
   updateTime();
 
-  setInterval(updateTime, 1000); // 🔥 ALWAYS MOVES
-
+  setInterval(updateTime, 1000);
   loadPrices();
   setInterval(loadPrices, 10000);
 
