@@ -9,7 +9,6 @@ function login() {
     alert("Enter details");
   }
 }
-
 // ===================== DASHBOARD =====================
 window.addEventListener("load", () => {
 
@@ -26,10 +25,11 @@ window.addEventListener("load", () => {
   let usd = parseFloat(localStorage.getItem(user+"_usd")) || 1000;
   let btc = parseFloat(localStorage.getItem(user+"_btc")) || 0;
   let eth = parseFloat(localStorage.getItem(user+"_eth")) || 0;
+
 let initial = parseFloat(localStorage.getItem(user+"_initial"));
 
-if(isNaN(initial)){
-  initial = 1000;
+if (isNaN(initial)) {
+  initial = usd;
   localStorage.setItem(user+"_initial", initial);
 }
   // ===== SAVE =====
