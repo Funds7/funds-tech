@@ -55,14 +55,20 @@ function logout() {
 
 // ================= PRICES =================
 function updatePrices() {
-  prices.BTC += (Math.random() - 0.5) * 250;
-  prices.ETH += (Math.random() - 0.5) * 15;
+  if (!prices.BTC) prices.BTC = 76000;
+  if (!prices.ETH) prices.ETH = 2300;
 
-  document.getElementById("btcPrice").innerText =
-    "BTC: $" + prices.BTC.toFixed(2);
+  prices.BTC += (Math.random() - 0.5) * 200;
+  prices.ETH += (Math.random() - 0.5) * 10;
 
-  document.getElementById("ethPrice").innerText =
-    "ETH: $" + prices.ETH.toFixed(2);
+  prices.BTC = Math.max(1000, prices.BTC);
+  prices.ETH = Math.max(50, prices.ETH);
+
+  let btcEl = document.getElementById("price");
+  let ethEl = document.getElementById("ethPrice");
+
+  if (btcEl) btcEl.innerText = "BTC: $" + prices.BTC.toFixed(2);
+  if (ethEl) ethEl.innerText = "ETH: $" + prices.ETH.toFixed(2);
 }
 
 // ================= PORTFOLIO SAFE =================
