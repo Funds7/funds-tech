@@ -89,13 +89,16 @@ function updatePL(){
     }
 
     btcPrice = data.bitcoin.usd;
-    ethPrice = data.ethereum.usd;
+ethPrice = data.ethereum.usd;
 
-    btcEl.innerText = btcPrice;
-    ethEl.innerText = ethPrice;
+btcEl.innerText = btcPrice;
+ethEl.innerText = ethPrice;
 
-    let total = usd + (btc * btcPrice) + (eth * ethPrice);
-    document.getElementById("total").innerText = total.toFixed(2);
+let total = usd + (btc * btcPrice) + (eth * ethPrice);
+document.getElementById("total").innerText = total.toFixed(2);
+
+// ✅ FIXED HERE
+updateUI();
 updatePL();
   } catch (err) {
     console.log("Price error:", err);
