@@ -56,58 +56,77 @@ window.addEventListener("load", () => {
   let ethPrice = 0;
 
   async function loadPrices() {
-    try {
-      let res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
-      let data = await res.json();
+  try {
+    let res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
 
-      btcPrice = data.bitcoin.usd;
-      ethPrice = data.ethereum.usd;
+    if(!res.ok) throw new Error("API failed");
 
-      document.getElementById("btc").innerText = btcPrice;
-      document.getElementById("eth").innerText = ethPrice;
+    let data = await res.json();
 
-      let total = usd + (btc * btcPrice) + (eth * ethPrice);
-      document.getElementById("total").innerText = total.toFixed(2);
+    let btcEl = document.getElementById("btc");
+    let ethEl = document.getElementById("eth");
 
-    } catch (err) {
-      console.log("Price error:", err);
+    if(!btcEl || !ethEl){
+      console.log("Price elements missing in HTML");
+      return;
     }
+
+    btcPrice = data.bitcoin.usd;
+    ethPrice = data.ethereum.usd;
+
+    btcEl.innerText = btcPrice;
+    ethEl.innerText = ethPrice;
+
+    let total = usd + (btc * btcPrice) + (eth * ethPrice);
+    document.getElementById("total").innerText = total.toFixed(2);
+
+  } catch (err) {
+    console.log("Price error:", err);
+  }
   }
 
-  // ===== BUY =====
+  // ===== BUY  =====
   window.buy = function(){
-    let amt = parseFloat(document.getElementById("amount").value);
+  let amt = parseFloat(document.getElementById("amount").value);
 
-    if(isNaN(amt) || amt <= 0) return alert("Enter valid amount");
-    if(amt > usd) return alert("Not enough USD");
+  if(!btcPrice || btcPrice <= 0){
+    return alert("Prices still loading, try again");
+  }
 
-    let btcBought = amt / btcPrice;
+  if(isNaN(amt) || amt <= 0) return alert("Enter valid amount");
+  if(amt > usd) return alert("Not enough USD");
 
-    usd -= amt;
-    btc += btcBought;
+  let btcBought = amt / btcPrice;
 
-    addHistory("BUY BTC $" + amt);
-    save();
-    updateUI();
+  usd -= amt;
+  btc += btcBought;
+
+  addHistory("BUY BTC $" + amt);
+  save();
+  updateUI();
   }
 
   // ===== SELL =====
   window.sell = function(){
-    let amt = parseFloat(document.getElementById("amount").value);
+  let amt = parseFloat(document.getElementById("amount").value);
 
-    if(isNaN(amt) || amt <= 0) return alert("Enter valid amount");
-
-    let btcToSell = amt / btcPrice;
-
-    if(btcToSell > btc) return alert("Not enough BTC");
-
-    btc -= btcToSell;
-    usd += amt;
-
-    addHistory("SELL BTC $" + amt);
-    save();
-    updateUI();
+  if(!btcPrice || btcPrice <= 0){
+    return alert("Prices still loading, try again");
   }
+
+  if(isNaN(amt) || amt <= 0) return alert("Enter valid amount");
+
+  let btcToSell = amt / btcPrice;
+
+  if(btcToSell > btc) return alert("Not enough BTC");
+
+  btc -= btcToSell;
+  usd += amt;
+
+  addHistory("SELL BTC $" + amt);
+  save();
+  updateUI();
+    }
 
   // ===== LOGOUT =====
   window.logout = function(){
