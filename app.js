@@ -21,67 +21,11 @@ window.addEventListener("load", () => {
     return;
   }
 
-  // ================= HELPERS =================
-  function animateValue(el, start, end, duration = 400) {
-    if (!el) return;
-
-    let startTime = null;
-
-    function step(timestamp) {
-      if (!startTime) startTime = timestamp;
-
-      let progress = Math.min((timestamp - startTime) / duration, 1);
-      let value = start + (end - start) * progress;
-
-      el.innerText = value.toFixed(2);
-
-      if (progress < 1) requestAnimationFrame(step);
-    }
-
-    requestAnimationFrame(step);
-  }
-
-  function animatePrice(el, value) {
-    if (!el) return;
-
-    el.classList.add("flash-up");
-    el.innerText = value;
-
-    setTimeout(() => {
-      el.classList.remove("flash-up");
-    }, 300);
-  }
-
-  function updateTime() {
-    const el = document.getElementById("lastUpdate");
-    if (!el) return;
-    el.innerText = "Last Update: " + new Date().toLocaleTimeString();
-  }
-
-  // ================= TRADE SOUND + VIBRATION =================
-  function tradeFeedback(type) {
-
-    // vibration
-    if (navigator.vibrate) {
-      navigator.vibrate(type === "buy" ? 80 : 150);
-    }
-
-    // sound
-    const sound = new Audio(
-      type === "buy"
-        ? "https://actions.google.com/sounds/v1/cash_register/cash_register_ring.ogg"
-        : "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
-    );
-
-    sound.volume = 0.4;
-    sound.play().catch(() => {});
-  }
-
-  // ================= USER =================
+  // ===== USER =====
   const userEl = document.getElementById("user");
   if (userEl) userEl.innerText = user;
 
-  // ================= DATA =================
+  // ===== DATA =====
   let usd = parseFloat(localStorage.getItem(user + "_usd")) || 1000;
   let btc = parseFloat(localStorage.getItem(user + "_btc")) || 0;
   let eth = parseFloat(localStorage.getItem(user + "_eth")) || 0;
@@ -92,7 +36,11 @@ window.addEventListener("load", () => {
     localStorage.setItem(user + "_initial", initial);
   }
 
-  // ================= COOLDOWN =================
+  // ===== PRICES =====
+  let btcPrice = 0;
+  let ethPrice = 0;
+
+  // ===== COOLDOWN =====
   let lastTradeTime = 0;
 
   function canTrade() {
@@ -105,14 +53,34 @@ window.addEventListener("load", () => {
     return true;
   }
 
-  // ================= SAVE =================
+  // ===== SAVE =====
   function save() {
     localStorage.setItem(user + "_usd", usd);
     localStorage.setItem(user + "_btc", btc);
     localStorage.setItem(user + "_eth", eth);
   }
 
-  // ================= UI =================
+  // ===== ANIMATION =====
+  function animatePrice(el, value) {
+    if (!el) return;
+
+    el.classList.add("flash-up");
+    el.innerText = value;
+
+    setTimeout(() => {
+      el.classList.remove("flash-up");
+    }, 300);
+  }
+
+  // ===== TIME =====
+  function updateTime() {
+    const el = document.getElementById("lastUpdate");
+    if (!el) return;
+
+    el.innerText = "Last Update: " + new Date().toLocaleTimeString();
+  }
+
+  // ===== UI =====
   function updateUI() {
     const balance = document.getElementById("balance");
     const usdEl = document.getElementById("usd");
@@ -125,7 +93,7 @@ window.addEventListener("load", () => {
     if (ethHold) ethHold.innerText = eth.toFixed(6);
   }
 
-  // ================= HISTORY =================
+  // ===== HISTORY =====
   function addHistory(text) {
     let history = document.getElementById("history");
     if (!history) return;
@@ -135,16 +103,13 @@ window.addEventListener("load", () => {
     history.appendChild(li);
   }
 
-  // ================= PRICES =================
-  let btcPrice = 0;
-  let ethPrice = 0;
-
+  // ===== P/L =====
   function updatePL() {
-    let totalValue = usd + (btc * btcPrice) + (eth * ethPrice);
-    let profit = totalValue - initial;
-    let percent = initial ? (profit / initial) * 100 : 0;
+    let total = usd + (btc * btcPrice) + (eth * ethPrice);
+    let profit = total - initial;
+    let percent = (profit / initial) * 100;
 
-    let plEl = document.getElementById("pl");
+    const plEl = document.getElementById("pl");
     if (!plEl) return;
 
     plEl.innerText =
@@ -152,45 +117,58 @@ window.addEventListener("load", () => {
       " (" + percent.toFixed(2) + "%)";
   }
 
-  async function loadPrices() {
-    try {
-      let res = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd"
-      );
+  // ===== SOUND + VIBRATION =====
+  function tradeFeedback(type) {
 
-      let data = await res.json();
-
-      btcPrice = data.bitcoin.usd;
-      ethPrice = data.ethereum.usd;
-
-      const btcEl = document.getElementById("btc");
-      const ethEl = document.getElementById("eth");
-
-      animatePrice(btcEl, btcPrice);
-      animatePrice(ethEl, ethPrice);
-
-      let total = usd + (btc * btcPrice) + (eth * ethPrice);
-
-      const totalEl = document.getElementById("total");
-      if (totalEl) totalEl.innerText = total.toFixed(2);
-
-      updateUI();
-      updatePL();
-      updateTime();
-
-    } catch (err) {
-      console.log("Price error:", err);
+    if (navigator.vibrate) {
+      navigator.vibrate(type === "buy" ? 80 : 150);
     }
+
+    const audio = new Audio(
+      type === "buy"
+        ? "https://actions.google.com/sounds/v1/cash_register/cash_register_ring.ogg"
+        : "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+    );
+
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
   }
 
-  // ================= BUY =================
+  // ===== PRICE LOAD =====
+  function loadPrices() {
+    fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd")
+      .then(res => res.json())
+      .then(data => {
+
+        btcPrice = data.bitcoin.usd;
+        ethPrice = data.ethereum.usd;
+
+        const btcEl = document.getElementById("btc");
+        const ethEl = document.getElementById("eth");
+
+        if (btcEl) animatePrice(btcEl, btcPrice);
+        if (ethEl) animatePrice(ethEl, ethPrice);
+
+        let total = usd + (btc * btcPrice) + (eth * ethPrice);
+
+        const totalEl = document.getElementById("total");
+        if (totalEl) totalEl.innerText = total.toFixed(2);
+
+        updateUI();
+        updatePL();
+        updateTime();
+      })
+      .catch(err => console.log(err));
+  }
+
+  // ===== BUY =====
   window.buy = function () {
 
     if (!canTrade()) return;
 
     let amt = parseFloat(document.getElementById("amount").value);
 
-    if (!btcPrice) return alert("Prices loading...");
+    if (!btcPrice || !ethPrice) return alert("Prices loading...");
     if (isNaN(amt) || amt <= 0) return alert("Enter valid amount");
     if (amt > usd) return alert("Not enough USD");
 
@@ -198,6 +176,7 @@ window.addEventListener("load", () => {
     usd -= amt;
 
     tradeFeedback("buy");
+
     addHistory("BUY BTC $" + amt);
 
     save();
@@ -205,14 +184,14 @@ window.addEventListener("load", () => {
     updatePL();
   };
 
-  // ================= SELL =================
+  // ===== SELL =====
   window.sell = function () {
 
     if (!canTrade()) return;
 
     let amt = parseFloat(document.getElementById("amount").value);
 
-    if (!btcPrice) return alert("Prices loading...");
+    if (!btcPrice || !ethPrice) return alert("Prices loading...");
     if (isNaN(amt) || amt <= 0) return alert("Enter valid amount");
 
     let btcToSell = amt / btcPrice;
@@ -223,6 +202,7 @@ window.addEventListener("load", () => {
     usd += amt;
 
     tradeFeedback("sell");
+
     addHistory("SELL BTC $" + amt);
 
     save();
@@ -230,13 +210,13 @@ window.addEventListener("load", () => {
     updatePL();
   };
 
-  // ================= LOGOUT =================
+  // ===== LOGOUT =====
   window.logout = function () {
     localStorage.removeItem("user");
     window.location.href = "index.html";
   };
 
-  // ================= START =================
+  // ===== START =====
   updateUI();
   updatePL();
   updateTime();
