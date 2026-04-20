@@ -41,15 +41,13 @@ window.addEventListener("load", () => {
     requestAnimationFrame(step);
   }
 
-  function animatePrice(el, newValue) {
+  function animatePrice(el, value) {
     if (!el) return;
 
     el.classList.add("flash-up");
-    el.innerText = newValue;
+    el.innerText = value;
 
-    setTimeout(() => {
-      el.classList.remove("flash-up");
-    }, 250);
+    setTimeout(() => el.classList.remove("flash-up"), 250);
   }
 
   function updateTime() {
@@ -60,8 +58,7 @@ window.addEventListener("load", () => {
   }
 
   // ===== USER =====
-  const userEl = document.getElementById("user");
-  if (userEl) userEl.innerText = user;
+  document.getElementById("user").innerText = user;
 
   // ===== DATA =====
   let usd = parseFloat(localStorage.getItem(user + "_usd")) || 1000;
@@ -135,38 +132,30 @@ window.addEventListener("load", () => {
       " (" + percent.toFixed(2) + "%)";
   }
 
-  // ===== PRICE LOADER =====
-  async function loadPrices() {
-    try {
-      let res = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd"
-      );
+  function loadPrices() {
+    fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd")
+      .then(res => res.json())
+      .then(data => {
 
-      if (!res.ok) return;
+        btcPrice = data.bitcoin.usd;
+        ethPrice = data.ethereum.usd;
 
-      let data = await res.json();
+        const btcEl = document.getElementById("btc");
+        const ethEl = document.getElementById("eth");
 
-      btcPrice = data.bitcoin.usd;
-      ethPrice = data.ethereum.usd;
+        animatePrice(btcEl, btcPrice);
+        animatePrice(ethEl, ethPrice);
 
-      const btcEl = document.getElementById("btc");
-      const ethEl = document.getElementById("eth");
+        const total = usd + (btc * btcPrice) + (eth * ethPrice);
 
-      if (btcEl) animatePrice(btcEl, btcPrice);
-      if (ethEl) animatePrice(ethEl, ethPrice);
+        const totalEl = document.getElementById("total");
+        if (totalEl) totalEl.innerText = total.toFixed(2);
 
-      let total = usd + (btc * btcPrice) + (eth * ethPrice);
-
-      const totalEl = document.getElementById("total");
-      if (totalEl) totalEl.innerText = total.toFixed(2);
-
-      updateUI();
-      updatePL();
-      updateTime();
-
-    } catch (err) {
-      console.log("Price error:", err);
-    }
+        updateUI();
+        updatePL();
+        updateTime();
+      })
+      .catch(err => console.log("Price error", err));
   }
 
   // ===== BUY =====
@@ -180,10 +169,8 @@ window.addEventListener("load", () => {
     if (isNaN(amt) || amt <= 0) return alert("Enter valid amount");
     if (amt > usd) return alert("Not enough USD");
 
-    let btcBought = amt / btcPrice;
-
+    btc += amt / btcPrice;
     usd -= amt;
-    btc += btcBought;
 
     addHistory("BUY BTC $" + amt);
 
