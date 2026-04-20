@@ -21,6 +21,28 @@ window.addEventListener("load", () => {
     return;
   }
 
+  // ✅ ADD HELPERS HERE (CLEAN ZONE)
+  function animateValue(el, start, end, duration = 400) {
+    if (!el) return;
+
+    let startTime = null;
+
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
+
+      let progress = Math.min((timestamp - startTime) / duration, 1);
+      let value = start + (end - start) * progress;
+
+      el.innerText = value.toFixed(2);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
   // ===== USER DISPLAY =====
   const userEl = document.getElementById("user");
   if (userEl) userEl.innerText = user;
@@ -59,15 +81,17 @@ window.addEventListener("load", () => {
 
   // ===== UI UPDATE =====
   function updateUI() {
-    const balance = document.getElementById("balance");
-    const usdEl = document.getElementById("usd");
-    const btcHold = document.getElementById("btc_hold");
-    const ethHold = document.getElementById("eth_hold");
+  const balance = document.getElementById("balance");
+  const usdEl = document.getElementById("usd");
 
-    if (balance) balance.innerText = usd.toFixed(2);
-    if (usdEl) usdEl.innerText = usd.toFixed(2);
-    if (btcHold) btcHold.innerText = btc.toFixed(6);
-    if (ethHold) ethHold.innerText = eth.toFixed(6);
+  if (balance) animateValue(balance, parseFloat(balance.innerText || 0), usd);
+  if (usdEl) animateValue(usdEl, parseFloat(usdEl.innerText || 0), usd);
+
+  const btcHold = document.getElementById("btc_hold");
+  const ethHold = document.getElementById("eth_hold");
+
+  if (btcHold) btcHold.innerText = btc.toFixed(6);
+  if (ethHold) ethHold.innerText = eth.toFixed(6);
   }
 
   // ===== HISTORY =====
