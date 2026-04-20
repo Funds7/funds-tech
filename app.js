@@ -30,12 +30,12 @@ window.addEventListener("load", () => {
   let btc = parseFloat(localStorage.getItem(user + "_btc")) || 0;
   let eth = parseFloat(localStorage.getItem(user + "_eth")) || 0;
 
+  // ===== FIXED INITIAL =====
   let initial = parseFloat(localStorage.getItem(user + "_initial"));
-
-if (isNaN(initial)) {
-  initial = 1000;
-  localStorage.setItem(user + "_initial", initial);
-}
+  if (!initial || isNaN(initial)) {
+    initial = 1000;
+    localStorage.setItem(user + "_initial", initial);
+  }
 
   // ===== TRADE COOLDOWN =====
   let lastTradeTime = 0;
@@ -78,6 +78,15 @@ if (isNaN(initial)) {
     let li = document.createElement("li");
     li.innerText = text;
     history.appendChild(li);
+  }
+
+  // ===== TIME (FIXED) =====
+  function updateTime() {
+    const el = document.getElementById("lastUpdate");
+    if (!el) return;
+
+    const now = new Date();
+    el.innerText = "Last Update: " + now.toLocaleTimeString();
   }
 
   // ===== PRICES =====
@@ -124,6 +133,7 @@ if (isNaN(initial)) {
 
       updateUI();
       updatePL();
+      updateTime();
 
     } catch (err) {
       console.log("Price error:", err);
@@ -184,10 +194,13 @@ if (isNaN(initial)) {
   };
 
   // ===== START =====
-updateUI();
-updatePL();
+  updateUI();
+  updatePL();
+  updateTime();
 
-loadPrices();
-setTimeout(loadPrices, 500); // optional fast refresh
-setInterval(loadPrices, 10000);
+  setInterval(updateTime, 1000); // 🔥 ALWAYS MOVES
+
+  loadPrices();
+  setInterval(loadPrices, 10000);
+
 });
