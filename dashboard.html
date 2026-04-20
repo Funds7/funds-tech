@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Pro Wallet</title>
+  <meta charset="UTF-8">
+  <title>Pro Wallet Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -13,7 +15,7 @@
   <div class="sidebar">
     <h2>⚡ ProWallet</h2>
 
-    <p class="user">User: <span id="user">-</span></p>
+    <p>User: <span id="user">-</span></p>
 
     <button onclick="logout()">Logout</button>
   </div>
@@ -27,36 +29,43 @@
 
       <p>BTC: $<span id="btc">loading...</span></p>
       <p>ETH: $<span id="eth">loading...</span></p>
+
+      <p id="lastUpdate">Last Update: --</p>
     </div>
-<div class="card">
-  <h3>Market Chart (BTC/USD)</h3>
 
-  <iframe
-    src="https://s.tradingview.com/widgetembed/?symbol=BINANCE:BTCUSDT&interval=15&theme=dark"
-    width="100%"
-    height="400"
-    style="border:none;border-radius:10px;">
-  </iframe>
+    <!-- CHART -->
+    <div class="card">
+      <h3>Market Chart (BTC/USD)</h3>
 
-</div>
+      <iframe
+        src="https://s.tradingview.com/widgetembed/?symbol=BINANCE:BTCUSDT&interval=15&theme=dark"
+        width="100%"
+        height="350"
+        style="border:none;border-radius:10px;">
+      </iframe>
+
+    </div>
+
     <!-- TOP CARDS -->
     <div class="grid">
 
       <div class="card">
-        <h3>Balance</h3>
+        <h3>Balance (USD)</h3>
         <h1>$<span id="balance">0</span></h1>
       </div>
-<div class="card">
-  <h3>Portfolio</h3>
 
-  <p>USD: $<span id="usd">0</span></p>
-  <p>BTC: <span id="btc_hold">0</span></p>
-  <p>ETH: <span id="eth_hold">0</span></p>
+      <div class="card">
+        <h3>Portfolio</h3>
 
-  <h3>Total Value: $<span id="total">0</span></h3>
+        <p>USD: $<span id="usd">0</span></p>
+        <p>BTC: <span id="btc_hold">0</span></p>
+        <p>ETH: <span id="eth_hold">0</span></p>
 
-  <p id="pl" style="font-weight:bold;">P/L: $0 (0%)</p>
-</div>
+        <h3>Total Value: $<span id="total">0</span></h3>
+
+        <p id="pl" style="font-weight:bold;">P/L: $0 (0%)</p>
+      </div>
+
       <div class="card">
         <h3>Market Status</h3>
         <p>Live Demo Trading</p>
@@ -64,11 +73,11 @@
 
     </div>
 
-    <!-- TRADE BOX -->
+    <!-- TRADE SECTION -->
     <div class="card trade">
-      <h3>Trade</h3>
+      <h3>Trade BTC</h3>
 
-      <input id="amount" placeholder="Enter amount">
+      <input id="amount" type="number" placeholder="Enter amount in USD">
 
       <div class="buttons">
         <button class="buy" onclick="buy()">BUY</button>
@@ -78,14 +87,15 @@
 
     <!-- HISTORY -->
     <div class="card">
-      <h3>History</h3>
+      <h3>Trade History</h3>
       <ul id="history"></ul>
     </div>
 
   </div>
-
 </div>
 
-<script src="app.js"></script>
+<!-- JS FILE -->
+<script src="script.js"></script>
+
 </body>
 </html>
