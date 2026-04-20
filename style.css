@@ -1,137 +1,63 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #070b14;
-  color: #fff;
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b0f1a;
+  color:white;
 }
 
-/* LAYOUT */
-.layout {
-  display: flex;
-  height: 100vh;
+.layout{
+  display:flex;
 }
 
 /* SIDEBAR */
-.sidebar {
-  width: 240px;
-  background: #0d1424;
-  padding: 20px;
-  border-right: 1px solid #1f2a44;
-}
-
-.sidebar h2 {
-  color: #22c55e;
-  margin-bottom: 20px;
-}
-
-.sidebar .user {
-  color: #aaa;
-  margin-bottom: 20px;
-}
-
-.sidebar button {
-  width: 100%;
-  padding: 12px;
-  background: #ef4444;
-  border: none;
-  color: white;
-  border-radius: 10px;
-  cursor: pointer;
+.sidebar{
+  width:220px;
+  background:#121a2a;
+  padding:20px;
+  height:100vh;
 }
 
 /* MAIN */
-.main {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
+.main{
+  flex:1;
+  padding:20px;
 }
 
-/* CARDS */
-.card {
-  background: #0f172a;
-  padding: 20px;
-  border-radius: 14px;
-  margin-bottom: 20px;
-  border: 1px solid #1f2a44;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+.card{
+  background:#121a2a;
+  padding:15px;
+  margin:10px 0;
+  border-radius:10px;
 }
 
 /* GRID */
-.grid {
-  display: flex;
-  gap: 20px;
-}
-
-/* BALANCE */
-.card h1 {
-  color: #22c55e;
-  font-size: 32px;
-}
-
-/* INPUT */
-.trade input {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid #1f2a44;
-  background: #0b1220;
-  color: white;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
 }
 
 /* BUTTONS */
-.buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
+button{
+  padding:10px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
 }
 
-button {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: bold;
+.buy{background:green;color:white;}
+.sell{background:red;color:white;}
+
+input{
+  padding:10px;
+  width:90%;
+  margin:10px 0;
+  border-radius:5px;
+  border:none;
 }
 
-.buy {
-  background: #22c55e;
-}
-
-.sell {
-  background: #ef4444;
-}
-
-/* HISTORY */
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-li {
-  padding: 10px;
-  border-bottom: 1px solid #1f2a44;
-  color: #ddd;
-}
-
-/* PRICE ANIMATION */
-.flash-up {
-  animation: flash 0.35s ease;
-}
-
-@keyframes flash {
-  0% {
-    color: #00ff88;
-    transform: scale(1.15);
-    text-shadow: 0 0 10px #00ff88;
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    color: inherit;
-    transform: scale(1);
-    text-shadow: none;
-  }
+/* CHART */
+#chartContainer{
+  height:350px;
+  width:100%;
 }
