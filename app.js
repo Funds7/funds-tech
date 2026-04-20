@@ -27,10 +27,10 @@ window.addEventListener("load", () => {
 
     let startTime = null;
 
-    function step(t) {
-      if (!startTime) startTime = t;
+    function step(timestamp) {
+      if (!startTime) startTime = timestamp;
 
-      let progress = Math.min((t - startTime) / duration, 1);
+      let progress = Math.min((timestamp - startTime) / duration, 1);
       let value = start + (end - start) * progress;
 
       el.innerText = value.toFixed(2);
@@ -49,7 +49,7 @@ window.addEventListener("load", () => {
 
     setTimeout(() => {
       el.classList.remove("flash-up");
-    }, 250);
+    }, 300);
   }
 
   function updateTime() {
@@ -58,7 +58,7 @@ window.addEventListener("load", () => {
     el.innerText = "Last Update: " + new Date().toLocaleTimeString();
   }
 
-  // ================= TRADE FEEDBACK =================
+  // ================= TRADE SOUND + VIBRATION =================
   function tradeFeedback(type) {
 
     // vibration
@@ -67,13 +67,13 @@ window.addEventListener("load", () => {
     }
 
     // sound
-    const sound = new Audio();
-    sound.src =
+    const sound = new Audio(
       type === "buy"
         ? "https://actions.google.com/sounds/v1/cash_register/cash_register_ring.ogg"
-        : "https://actions.google.com/sounds/v1/alarms/beep_short.ogg";
+        : "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+    );
 
-    sound.volume = 0.5;
+    sound.volume = 0.4;
     sound.play().catch(() => {});
   }
 
@@ -119,13 +119,13 @@ window.addEventListener("load", () => {
     const btcHold = document.getElementById("btc_hold");
     const ethHold = document.getElementById("eth_hold");
 
-    if (balance) animateValue(balance, parseFloat(balance.innerText || 0), usd);
-    if (usdEl) animateValue(usdEl, parseFloat(usdEl.innerText || 0), usd);
-
+    if (balance) balance.innerText = usd.toFixed(2);
+    if (usdEl) usdEl.innerText = usd.toFixed(2);
     if (btcHold) btcHold.innerText = btc.toFixed(6);
     if (ethHold) ethHold.innerText = eth.toFixed(6);
   }
 
+  // ================= HISTORY =================
   function addHistory(text) {
     let history = document.getElementById("history");
     if (!history) return;
@@ -140,16 +140,16 @@ window.addEventListener("load", () => {
   let ethPrice = 0;
 
   function updatePL() {
-    let total = usd + btc * btcPrice + eth * ethPrice;
-    let profit = total - initial;
+    let totalValue = usd + (btc * btcPrice) + (eth * ethPrice);
+    let profit = totalValue - initial;
     let percent = initial ? (profit / initial) * 100 : 0;
 
     let plEl = document.getElementById("pl");
-    if (plEl) {
-      plEl.innerText =
-        "P/L: $" + profit.toFixed(2) +
-        " (" + percent.toFixed(2) + "%)";
-    }
+    if (!plEl) return;
+
+    plEl.innerText =
+      "P/L: $" + profit.toFixed(2) +
+      " (" + percent.toFixed(2) + "%)";
   }
 
   async function loadPrices() {
@@ -169,7 +169,7 @@ window.addEventListener("load", () => {
       animatePrice(btcEl, btcPrice);
       animatePrice(ethEl, ethPrice);
 
-      let total = usd + btc * btcPrice + eth * ethPrice;
+      let total = usd + (btc * btcPrice) + (eth * ethPrice);
 
       const totalEl = document.getElementById("total");
       if (totalEl) totalEl.innerText = total.toFixed(2);
@@ -185,6 +185,7 @@ window.addEventListener("load", () => {
 
   // ================= BUY =================
   window.buy = function () {
+
     if (!canTrade()) return;
 
     let amt = parseFloat(document.getElementById("amount").value);
@@ -206,6 +207,7 @@ window.addEventListener("load", () => {
 
   // ================= SELL =================
   window.sell = function () {
+
     if (!canTrade()) return;
 
     let amt = parseFloat(document.getElementById("amount").value);
@@ -242,4 +244,5 @@ window.addEventListener("load", () => {
   setInterval(updateTime, 1000);
   loadPrices();
   setInterval(loadPrices, 10000);
+
 });
