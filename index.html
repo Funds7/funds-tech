@@ -1,39 +1,118 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="en">
 <head>
-  <title>Pro Wallet - Login</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ProWallet</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#0b0f1a;
+  color:#fff;
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 20px;
+  background:#111a2e;
+  border-bottom:1px solid #1f2a44;
+}
+.container{padding:15px;}
+.card{
+  background:#121a2b;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:12px;
+}
+.row{display:flex;justify-content:space-between;align-items:center;}
+.balance{
+  font-size:26px;
+  font-weight:bold;
+  margin-top:8px;
+}
+.btn{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+.buy{background:#00d18f;color:#000;}
+.sell{background:#ff4d4d;color:#fff;}
+input{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
+  border:none;
+  background:#0f1726;
+  color:#fff;
+}
+.small{font-size:12px;color:#aaa;}
+.crypto{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1f2a44;}
+.profit{color:#00d18f;}
+.loss{color:#ff4d4d;}
+</style>
 </head>
+<body><header>
+  <div>ProWallet</div>
+  <div id="user">User</div>
+</header><div class="container">  <div class="card">
+    <div class="small">Live Crypto Prices</div>
+    <div class="crypto"><span>BTC</span><span id="btc">$76279</span></div>
+    <div class="crypto"><span>ETH</span><span id="eth">$2341</span></div>
+    <div class="small" id="time"></div>
+  </div>  <div class="card">
+    <div class="small">Balance (USD)</div>
+    <div class="balance" id="balance">$990.00</div>
+    <div class="small">Portfolio Value</div>
+    <div>Total: <b id="total">$1000.00</b> <span id="pl" class="profit">(+0.00%)</span></div>
+  </div>  <div class="card">
+    <div class="row">
+      <button class="btn buy" onclick="trade('BUY')">BUY</button>
+      <button class="btn sell" onclick="trade('SELL')">SELL</button>
+    </div>
+    <input placeholder="Trade Amount ($)" id="amt" />
+  </div>  <div class="card">
+    <div class="small">Trade History</div>
+    <div id="history">No trades yet</div>
+  </div></div><script>
+let balance=990;
+let total=1000;
 
-<body>
+function updateTime(){
+  document.getElementById("time").innerText="Last Update: "+new Date().toLocaleTimeString();
+}
 
-  <div class="login-box">
+function trade(type){
+  let amt=Number(document.getElementById("amt").value)||10;
+  let change=Math.random()*amt;
 
-    <h2>⚡ ProWallet Login</h2>
+  if(type=="BUY"){
+    balance-=amt;
+    total+=change;
+  }else{
+    balance+=amt;
+    total-=change;
+  }
 
-    <input id="username" placeholder="Username">
-    <input id="password" type="password" placeholder="Password">
+  document.getElementById("balance").innerText="$"+balance.toFixed(2);
+  document.getElementById("total").innerText="$"+total.toFixed(2);
 
-    <button onclick="login()">Login</button>
+  let pl=((total-1000)/1000*100).toFixed(2);
+  document.getElementById("pl").innerText=(pl>=0?"(+":"(")+pl+"%)";
 
-  </div>
+  let h=document.getElementById("history");
+  h.innerHTML=type+" BTC $"+amt+" • "+new Date().toLocaleTimeString()+"<br>"+h.innerHTML;
+}
 
-  <script>
-    function login() {
-      let user = document.getElementById("username").value;
-      let pass = document.getElementById("password").value;
+setInterval(()=>{
+  document.getElementById("btc").innerText="$"+(76000+Math.random()*300);
+  document.getElementById("eth").innerText="$"+(2300+Math.random()*80);
+  updateTime();
+},2000);
 
-      if (user && pass) {
-        localStorage.setItem("user", user);
-        window.location.href = "dashboard.html";
-      } else {
-        alert("Enter details");
-      }
-    }
-
-    // ❌ IMPORTANT: NO AUTO REDIRECT HERE
-    // DO NOT ADD dashboard redirect logic
-  </script>
-
-</body>
+updateTime();
+</script></body>
 </html>
