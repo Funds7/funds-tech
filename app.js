@@ -95,12 +95,31 @@ window.addEventListener("load", () => {
 
   // ===== HISTORY =====
   function addHistory(text) {
-    let history = document.getElementById("history");
-    if (!history) return;
+    let historyData = JSON.parse(localStorage.getItem(user + "_history")) || [];
 
-    let li = document.createElement("li");
-    li.innerText = text;
-    history.appendChild(li);
+    historyData.push({
+      text: text,
+      time: new Date().toLocaleTimeString()
+    });
+
+    localStorage.setItem(user + "_history", JSON.stringify(historyData));
+
+    renderHistory();
+  }
+
+  function renderHistory() {
+    let historyEl = document.getElementById("history");
+    if (!historyEl) return;
+
+    historyEl.innerHTML = "";
+
+    let historyData = JSON.parse(localStorage.getItem(user + "_history")) || [];
+
+    historyData.slice().reverse().forEach(item => {
+      let li = document.createElement("li");
+      li.innerText = `${item.text} • ${item.time}`;
+      historyEl.appendChild(li);
+    });
   }
 
   // ===== P/L =====
@@ -120,18 +139,18 @@ window.addEventListener("load", () => {
   // ===== SOUND + VIBRATION =====
   function tradeFeedback(type) {
 
-  if (navigator.vibrate) {
-    navigator.vibrate(type === "buy" ? 80 : 150);
-  }
+    if (navigator.vibrate) {
+      navigator.vibrate(type === "buy" ? 80 : 150);
+    }
 
-  const audio = new Audio(
-    type === "buy"
-      ? "https://actions.google.com/sounds/v1/cartoon/pop.ogg"   // 🟢 NEW
-      : "https://actions.google.com/sounds/v1/alarms/beep_short.ogg" // 🔴
-  );
+    const audio = new Audio(
+      type === "buy"
+        ? "https://actions.google.com/sounds/v1/cartoon/pop.ogg"
+        : "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
+    );
 
-  audio.volume = 0.5;
-  audio.play().catch(() => {});
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
   }
 
   // ===== PRICE LOAD =====
@@ -168,7 +187,7 @@ window.addEventListener("load", () => {
 
     let amt = parseFloat(document.getElementById("amount").value);
 
-    if (!btcPrice || !ethPrice) return alert("Prices loading...");
+    if (!btcPrice) return alert("Prices loading...");
     if (isNaN(amt) || amt <= 0) return alert("Enter valid amount");
     if (amt > usd) return alert("Not enough USD");
 
@@ -176,7 +195,6 @@ window.addEventListener("load", () => {
     usd -= amt;
 
     tradeFeedback("buy");
-
     addHistory("BUY BTC $" + amt);
 
     save();
@@ -191,7 +209,7 @@ window.addEventListener("load", () => {
 
     let amt = parseFloat(document.getElementById("amount").value);
 
-    if (!btcPrice || !ethPrice) return alert("Prices loading...");
+    if (!btcPrice) return alert("Prices loading...");
     if (isNaN(amt) || amt <= 0) return alert("Enter valid amount");
 
     let btcToSell = amt / btcPrice;
@@ -202,7 +220,6 @@ window.addEventListener("load", () => {
     usd += amt;
 
     tradeFeedback("sell");
-
     addHistory("SELL BTC $" + amt);
 
     save();
@@ -220,6 +237,7 @@ window.addEventListener("load", () => {
   updateUI();
   updatePL();
   updateTime();
+  renderHistory();
 
   setInterval(updateTime, 1000);
   loadPrices();
