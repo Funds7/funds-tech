@@ -1,118 +1,241 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ProWallet</title>
+
 <style>
 body{
   margin:0;
-  font-family:Arial,sans-serif;
+  font-family:Arial;
   background:#0b0f1a;
-  color:#fff;
+  color:white;
 }
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:15px 20px;
-  background:#111a2e;
-  border-bottom:1px solid #1f2a44;
+
+.hidden{display:none;}
+
+.container{
+  padding:20px;
 }
-.container{padding:15px;}
+
 .card{
-  background:#121a2b;
+  background:#121a2a;
   padding:15px;
-  border-radius:12px;
-  margin-bottom:12px;
+  margin:10px 0;
+  border-radius:10px;
 }
-.row{display:flex;justify-content:space-between;align-items:center;}
-.balance{
-  font-size:26px;
-  font-weight:bold;
-  margin-top:8px;
-}
-.btn{
+
+button{
   padding:10px;
-  border:none;
-  border-radius:8px;
+  margin:5px;
   cursor:pointer;
-  font-weight:bold;
-}
-.buy{background:#00d18f;color:#000;}
-.sell{background:#ff4d4d;color:#fff;}
-input{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border-radius:8px;
   border:none;
-  background:#0f1726;
-  color:#fff;
+  border-radius:5px;
 }
-.small{font-size:12px;color:#aaa;}
-.crypto{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1f2a44;}
-.profit{color:#00d18f;}
-.loss{color:#ff4d4d;}
+
+input{
+  padding:10px;
+  margin:5px;
+  width:90%;
+}
 </style>
 </head>
-<body><header>
-  <div>ProWallet</div>
-  <div id="user">User</div>
-</header><div class="container">  <div class="card">
-    <div class="small">Live Crypto Prices</div>
-    <div class="crypto"><span>BTC</span><span id="btc">$76279</span></div>
-    <div class="crypto"><span>ETH</span><span id="eth">$2341</span></div>
-    <div class="small" id="time"></div>
-  </div>  <div class="card">
-    <div class="small">Balance (USD)</div>
-    <div class="balance" id="balance">$990.00</div>
-    <div class="small">Portfolio Value</div>
-    <div>Total: <b id="total">$1000.00</b> <span id="pl" class="profit">(+0.00%)</span></div>
-  </div>  <div class="card">
-    <div class="row">
-      <button class="btn buy" onclick="trade('BUY')">BUY</button>
-      <button class="btn sell" onclick="trade('SELL')">SELL</button>
-    </div>
-    <input placeholder="Trade Amount ($)" id="amt" />
-  </div>  <div class="card">
-    <div class="small">Trade History</div>
-    <div id="history">No trades yet</div>
-  </div></div><script>
-let balance=990;
-let total=1000;
 
-function updateTime(){
-  document.getElementById("time").innerText="Last Update: "+new Date().toLocaleTimeString();
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginPage" class="container">
+  <h2>ProWallet Login</h2>
+
+  <input id="username" placeholder="Username" />
+  <input id="password" type="password" placeholder="Password" />
+
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- ================= DASHBOARD ================= -->
+<div id="app" class="container hidden">
+
+  <h2>ProWallet</h2>
+  <button onclick="logout()">Logout</button>
+
+  <div class="card">
+    <h3>Live Prices</h3>
+    BTC: $<span id="btcPrice"></span><br/>
+    ETH: $<span id="ethPrice"></span>
+  </div>
+
+  <div class="card">
+    <h3>Wallet</h3>
+    Balance: $<span id="usdBalance"></span><br/>
+    BTC: <span id="btcHoldings"></span><br/>
+    Total: $<span id="totalValue"></span><br/>
+    P/L: <span id="pl"></span>
+  </div>
+
+  <div class="card">
+    <h3>Trade</h3>
+    <input id="tradeAmount" placeholder="Amount in USD"/>
+
+    <button onclick="buy()">BUY</button>
+    <button onclick="sell()">SELL</button>
+  </div>
+
+  <div class="card">
+    <h3>Trade History</h3>
+    <div id="tradeHistory"></div>
+  </div>
+
+</div>
+
+<script>
+// ================= STATE =================
+let state = JSON.parse(localStorage.getItem("wallet")) || {
+  loggedIn:false,
+  usdBalance:1000,
+  btcHoldings:0,
+  btcPrice:76000,
+  ethPrice:2300,
+  trades:[]
+};
+
+const START = 1000;
+
+// ================= SAVE =================
+function save(){
+  localStorage.setItem("wallet", JSON.stringify(state));
 }
 
-function trade(type){
-  let amt=Number(document.getElementById("amt").value)||10;
-  let change=Math.random()*amt;
+// ================= LOGIN =================
+function login(){
+  let u = document.getElementById("username").value;
+  let p = document.getElementById("password").value;
 
-  if(type=="BUY"){
-    balance-=amt;
-    total+=change;
-  }else{
-    balance+=amt;
-    total-=change;
-  }
+  if(!u || !p) return alert("Enter details");
 
-  document.getElementById("balance").innerText="$"+balance.toFixed(2);
-  document.getElementById("total").innerText="$"+total.toFixed(2);
-
-  let pl=((total-1000)/1000*100).toFixed(2);
-  document.getElementById("pl").innerText=(pl>=0?"(+":"(")+pl+"%)";
-
-  let h=document.getElementById("history");
-  h.innerHTML=type+" BTC $"+amt+" • "+new Date().toLocaleTimeString()+"<br>"+h.innerHTML;
+  state.loggedIn = true;
+  save();
+  showApp();
 }
 
+// ================= LOGOUT =================
+function logout(){
+  state.loggedIn = false;
+  save();
+  showLogin();
+}
+
+// ================= NAV =================
+function showApp(){
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  render();
+}
+
+function showLogin(){
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("loginPage").classList.remove("hidden");
+}
+
+// ================= PRICES =================
+function updatePrices(){
+  state.btcPrice += (Math.random()-0.5)*200;
+  state.ethPrice += (Math.random()-0.5)*10;
+}
+
+// ================= BUY =================
+function buy(){
+  let amt = parseFloat(document.getElementById("tradeAmount").value);
+  if(!amt || amt <= 0) return;
+
+  if(amt > state.usdBalance) return alert("Not enough USD");
+
+  let btc = amt / state.btcPrice;
+
+  state.usdBalance -= amt;
+  state.btcHoldings += btc;
+
+  state.trades.unshift({
+    type:"BUY",
+    amt,
+    time:new Date().toLocaleTimeString()
+  });
+
+  save();
+  render();
+}
+
+// ================= SELL =================
+function sell(){
+  let amt = parseFloat(document.getElementById("tradeAmount").value);
+  if(!amt || amt <= 0) return;
+
+  let btc = amt / state.btcPrice;
+
+  if(btc > state.btcHoldings) return alert("Not enough BTC");
+
+  state.usdBalance += amt;
+  state.btcHoldings -= btc;
+
+  state.trades.unshift({
+    type:"SELL",
+    amt,
+    time:new Date().toLocaleTimeString()
+  });
+
+  save();
+  render();
+}
+
+// ================= PORTFOLIO =================
+function totalValue(){
+  return state.usdBalance + (state.btcHoldings * state.btcPrice);
+}
+
+function pl(){
+  let diff = totalValue() - START;
+  let pct = (diff/START)*100;
+  return `${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
+}
+
+// ================= RENDER =================
+function render(){
+
+  document.getElementById("btcPrice").innerText = state.btcPrice.toFixed(2);
+  document.getElementById("ethPrice").innerText = state.ethPrice.toFixed(2);
+
+  document.getElementById("usdBalance").innerText = state.usdBalance.toFixed(2);
+  document.getElementById("btcHoldings").innerText = state.btcHoldings.toFixed(6);
+
+  document.getElementById("totalValue").innerText = totalValue().toFixed(2);
+  document.getElementById("pl").innerText = pl();
+
+  let h = document.getElementById("tradeHistory");
+  h.innerHTML = "";
+
+  state.trades.slice(0,10).forEach(t=>{
+    let div = document.createElement("div");
+    div.innerText = `${t.type} $${t.amt} • ${t.time}`;
+    h.appendChild(div);
+  });
+
+  save();
+}
+
+// ================= LOOP =================
 setInterval(()=>{
-  document.getElementById("btc").innerText="$"+(76000+Math.random()*300);
-  document.getElementById("eth").innerText="$"+(2300+Math.random()*80);
-  updateTime();
-},2000);
+  updatePrices();
+  if(state.loggedIn) render();
+},3000);
 
-updateTime();
-</script></body>
+// ================= INIT =================
+if(state.loggedIn){
+  showApp();
+}else{
+  showLogin();
+}
+</script>
+
+</body>
 </html>
