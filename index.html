@@ -1,323 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ProWallet</title>
-
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#0b0f1a;
-  color:white;
-}
-
-.hidden{display:none;}
-
-.container{padding:20px;}
-
-.card{
-  background:#121a2a;
-  padding:15px;
-  margin:10px 0;
-  border-radius:10px;
-}
-
-button{
-  padding:10px;
-  margin:5px;
-  cursor:pointer;
-  border:none;
-  border-radius:5px;
-}
-
-input{
-  padding:10px;
-  margin:5px;
-  width:90%;
-  border-radius:5px;
-  border:none;
-}
-
-#chatBox{
-  height:200px;
-  overflow-y:auto;
-  background:#0f1626;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:10px;
-  font-size:14px;
-}
-.msg{
-  margin:5px 0;
-}
-.me{color:#4dd0e1;}
-.other{color:#ffb74d;}
-</style>
+  <meta charset="UTF-8">
+  <title>Pro Wallet Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- ================= LOGIN ================= -->
-<div id="loginPage" class="container">
-  <h2>ProWallet Login</h2>
+<div class="layout">
 
-  <input id="username" placeholder="Username" />
-  <input id="password" type="password" placeholder="Password" />
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>⚡ ProWallet</h2>
 
-  <button onclick="login()">Login</button>
+    <p>User: <span id="user">-</span></p>
+
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- LIVE PRICES -->
+    <div class="card">
+      <h3>Live Crypto Prices</h3>
+
+      <p>BTC: $<span id="btc">loading...</span></p>
+      <p>ETH: $<span id="eth">loading...</span></p>
+
+      <p id="lastUpdate">Last Update: --</p>
+    </div>
+
+    <!-- CHART -->
+    <div class="card">
+      <h3>Market Chart (BTC/USD)</h3>
+
+      <div id="chartContainer"></div>
+    </div>
+
+    <!-- TOP CARDS -->
+    <div class="grid">
+
+      <div class="card">
+        <h3>Balance (USD)</h3>
+        <h1>$<span id="balance">0</span></h1>
+      </div>
+
+      <div class="card">
+        <h3>Portfolio</h3>
+
+        <p>USD: $<span id="usd">0</span></p>
+        <p>BTC: <span id="btc_hold">0</span></p>
+        <p>ETH: <span id="eth_hold">0</span></p>
+
+        <h3>Total Value: $<span id="total">0</span></h3>
+
+        <p id="pl">P/L: $0 (0%)</p>
+      </div>
+
+      <div class="card">
+        <h3>Market Status</h3>
+        <p>Live Demo Trading</p>
+      </div>
+
+    </div>
+
+    <!-- TRADE -->
+    <div class="card trade">
+      <h3>Trade BTC</h3>
+
+      <input id="amount" type="number" placeholder="Enter amount in USD">
+
+      <div class="buttons">
+        <button class="buy" onclick="buy()">BUY</button>
+        <button class="sell" onclick="sell()">SELL</button>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="card">
+      <h3>Trade History</h3>
+      <ul id="history"></ul>
+    </div>
+
+  </div>
 </div>
 
-<!-- ================= APP ================= -->
-<div id="app" class="container hidden">
+<!-- TRADINGVIEW -->
+<script src="https://s3.tradingview.com/tv.js"></script>
 
-  <h2>ProWallet</h2>
-  <button onclick="logout()">Logout</button>
-
-  <!-- LIVE PRICES -->
-  <div class="card">
-    <h3>Live Prices</h3>
-    BTC: $<span id="btcPrice"></span><br/>
-    ETH: $<span id="ethPrice"></span>
-  </div>
-
-  <!-- WALLET -->
-  <div class="card">
-    <h3>Wallet</h3>
-    Balance: $<span id="usdBalance"></span><br/>
-    BTC: <span id="btcHoldings"></span><br/>
-    Total: $<span id="totalValue"></span><br/>
-    P/L: <span id="pl"></span>
-  </div>
-
-  <!-- TRADE -->
-  <div class="card">
-    <h3>Trade</h3>
-    <input id="tradeAmount" placeholder="Amount in USD"/>
-    <button onclick="buy()">BUY</button>
-    <button onclick="sell()">SELL</button>
-  </div>
-
-  <!-- TRADE HISTORY -->
-  <div class="card">
-    <h3>Trade History</h3>
-    <div id="tradeHistory"></div>
-  </div>
-
-  <!-- 💬 LIVE CHAT -->
-  <div class="card">
-    <h3>Live Chat</h3>
-
-    <div id="chatBox"></div>
-
-    <input id="chatInput" placeholder="Type message..." />
-    <button onclick="sendMessage()">Send</button>
-  </div>
-
-</div>
-
-<script>
-
-// ================= STATE =================
-let state = JSON.parse(localStorage.getItem("wallet")) || {
-  loggedIn:false,
-  usdBalance:1000,
-  btcHoldings:0,
-  btcPrice:76000,
-  ethPrice:2300,
-  trades:[],
-  chat:[]
-};
-
-const START = 1000;
-
-// ================= SAVE =================
-function save(){
-  localStorage.setItem("wallet", JSON.stringify(state));
-}
-
-// ================= LOGIN =================
-function login(){
-  let u = document.getElementById("username").value;
-  let p = document.getElementById("password").value;
-
-  if(!u || !p) return alert("Enter details");
-
-  state.loggedIn = true;
-  state.username = u;
-
-  save();
-  showApp();
-}
-
-function logout(){
-  state.loggedIn = false;
-  save();
-  showLogin();
-}
-
-// ================= NAV =================
-function showApp(){
-  document.getElementById("loginPage").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-  render();
-}
-
-function showLogin(){
-  document.getElementById("app").classList.add("hidden");
-  document.getElementById("loginPage").classList.remove("hidden");
-}
-
-// ================= PRICES =================
-function updatePrices(){
-  state.btcPrice += (Math.random()-0.5)*200;
-  state.ethPrice += (Math.random()-0.5)*10;
-}
-
-// ================= TRADE =================
-function buy(){
-  let amt = parseFloat(document.getElementById("tradeAmount").value);
-  if(!amt) return;
-
-  if(amt > state.usdBalance) return alert("Not enough USD");
-
-  let btc = amt / state.btcPrice;
-
-  state.usdBalance -= amt;
-  state.btcHoldings += btc;
-
-  state.trades.unshift({type:"BUY", amt, time:new Date().toLocaleTimeString()});
-
-  save();
-  render();
-}
-
-function sell(){
-  let amt = parseFloat(document.getElementById("tradeAmount").value);
-  if(!amt) return;
-
-  let btc = amt / state.btcPrice;
-
-  if(btc > state.btcHoldings) return alert("Not enough BTC");
-
-  state.usdBalance += amt;
-  state.btcHoldings -= btc;
-
-  state.trades.unshift({type:"SELL", amt, time:new Date().toLocaleTimeString()});
-
-  save();
-  render();
-}
-
-// ================= WALLET =================
-function totalValue(){
-  return state.usdBalance + (state.btcHoldings * state.btcPrice);
-}
-
-function pl(){
-  let diff = totalValue() - START;
-  let pct = (diff/START)*100;
-  return `${diff.toFixed(2)} (${pct.toFixed(2)}%)`;
-}
-
-// ================= CHAT =================
-function sendMessage(){
-  let msg = document.getElementById("chatInput").value;
-  if(!msg) return;
-
-  state.chat.push({
-    user: state.username || "Me",
-    msg,
-    time: new Date().toLocaleTimeString()
-  });
-
-  document.getElementById("chatInput").value = "";
-  save();
-  renderChat();
-}
-
-// fake live replies (simulation)
-function botReply(){
-  const replies = [
-    "Nice trade 🔥",
-    "BTC looking strong 📈",
-    "Be careful with volatility ⚠️",
-    "Good entry point 👍",
-    "Market is moving fast 🚀"
-  ];
-
-  state.chat.push({
-    user:"Bot",
-    msg: replies[Math.floor(Math.random()*replies.length)],
-    time:new Date().toLocaleTimeString()
-  });
-
-  save();
-  renderChat();
-}
-
-// ================= RENDER =================
-function render(){
-
-  document.getElementById("btcPrice").innerText = state.btcPrice.toFixed(2);
-  document.getElementById("ethPrice").innerText = state.ethPrice.toFixed(2);
-
-  document.getElementById("usdBalance").innerText = state.usdBalance.toFixed(2);
-  document.getElementById("btcHoldings").innerText = state.btcHoldings.toFixed(6);
-
-  document.getElementById("totalValue").innerText = totalValue().toFixed(2);
-  document.getElementById("pl").innerText = pl();
-
-  let h = document.getElementById("tradeHistory");
-  h.innerHTML = "";
-
-  state.trades.slice(0,10).forEach(t=>{
-    let div = document.createElement("div");
-    div.innerText = `${t.type} $${t.amt} • ${t.time}`;
-    h.appendChild(div);
-  });
-
-  renderChat();
-  save();
-}
-
-// ================= CHAT RENDER =================
-function renderChat(){
-  let box = document.getElementById("chatBox");
-  box.innerHTML = "";
-
-  state.chat.slice(-20).forEach(c=>{
-    let div = document.createElement("div");
-    div.className = "msg " + (c.user === state.username ? "me" : "other");
-    div.innerText = `${c.user}: ${c.msg} (${c.time})`;
-    box.appendChild(div);
-  });
-
-  box.scrollTop = box.scrollHeight;
-}
-
-// ================= LOOP =================
-setInterval(()=>{
-  updatePrices();
-  if(state.loggedIn){
-    render();
-
-    // random bot chat
-    if(Math.random() < 0.3){
-      botReply();
-    }
-  }
-},3000);
-
-// ================= INIT =================
-if(state.loggedIn){
-  showApp();
-}else{
-  showLogin();
-}
-
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
