@@ -120,18 +120,18 @@ window.addEventListener("load", () => {
   // ===== SOUND + VIBRATION =====
   function tradeFeedback(type) {
 
-    if (navigator.vibrate) {
-      navigator.vibrate(type === "buy" ? 80 : 150);
-    }
+  if (navigator.vibrate) {
+    navigator.vibrate(type === "buy" ? 80 : 150);
+  }
 
-    const audio = new Audio(
-      type === "buy"
-        ? "https://actions.google.com/sounds/v1/cash_register/cash_register_ring.ogg"
-        : "https://actions.google.com/sounds/v1/alarms/beep_short.ogg"
-    );
+  const audio = new Audio(
+    type === "buy"
+      ? "https://actions.google.com/sounds/v1/cartoon/pop.ogg"   // 🟢 NEW
+      : "https://actions.google.com/sounds/v1/alarms/beep_short.ogg" // 🔴
+  );
 
-    audio.volume = 0.5;
-    audio.play().catch(() => {});
+  audio.volume = 0.5;
+  audio.play().catch(() => {});
   }
 
   // ===== PRICE LOAD =====
