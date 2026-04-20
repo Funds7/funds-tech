@@ -26,7 +26,12 @@ window.addEventListener("load", () => {
   let usd = parseFloat(localStorage.getItem(user+"_usd")) || 1000;
   let btc = parseFloat(localStorage.getItem(user+"_btc")) || 0;
   let eth = parseFloat(localStorage.getItem(user+"_eth")) || 0;
+let initial = parseFloat(localStorage.getItem(user+"_initial"));
 
+if(isNaN(initial)){
+  initial = 1000;
+  localStorage.setItem(user+"_initial", initial);
+}
   // ===== SAVE =====
   function save(){
     localStorage.setItem(user+"_usd", usd);
@@ -54,7 +59,19 @@ window.addEventListener("load", () => {
   // ===== PRICES =====
   let btcPrice = 0;
   let ethPrice = 0;
+function updatePL(){
+  let totalValue = usd + (btc * btcPrice) + (eth * ethPrice);
 
+  let profit = totalValue - initial;
+  let percent = initial ? (profit / initial) * 100 : 0;
+
+  let plEl = document.getElementById("pl");
+  if(!plEl) return;
+
+  plEl.innerText =
+    "P/L: $" + profit.toFixed(2) +
+    " (" + percent.toFixed(2) + "%)";
+}
   async function loadPrices() {
   try {
     let res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd");
@@ -79,7 +96,7 @@ window.addEventListener("load", () => {
 
     let total = usd + (btc * btcPrice) + (eth * ethPrice);
     document.getElementById("total").innerText = total.toFixed(2);
-
+updatePL();
   } catch (err) {
     console.log("Price error:", err);
   }
@@ -103,7 +120,7 @@ window.addEventListener("load", () => {
 
   addHistory("BUY BTC $" + amt);
   save();
-  updateUI();
+  updateUI();updatePL();
   }
 
   // ===== SELL =====
@@ -125,7 +142,7 @@ window.addEventListener("load", () => {
 
   addHistory("SELL BTC $" + amt);
   save();
-  updateUI();
+  updateUI();updatePL();
     }
 
   // ===== LOGOUT =====
