@@ -152,7 +152,7 @@ updatePL();
   }
 
   // ===== RUN PRICES =====
-  loadPrices();
+  loadPrices();setTimeout(loadPrices, 500);
   setInterval(loadPrices, 10000);
 
 });
