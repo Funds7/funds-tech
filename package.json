@@ -1,0 +1,15 @@
+{
+  "name": "pro-exchange-backend",
+  "version": "1.0.0",
+  "description": "Mini Binance-style exchange backend (matching engine + websocket + wallet)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0",
+    "cors": "^2.8.5"
+  }
+}
