@@ -68,25 +68,41 @@ function logout() {
 }
 
 // ================= PRICES =================
+let lastPrice = 0;
+
 async function updatePrices() {
   try {
     const res = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd"
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
     );
 
     const data = await res.json();
-
-    prices.BTC = data.bitcoin.usd;
-    prices.ETH = data.ethereum.usd;
+    let newPrice = data.bitcoin.usd;
 
     const btcEl = document.getElementById("price");
-    const ethEl = document.getElementById("ethPrice");
 
-    if (btcEl) btcEl.innerText = "BTC: $" + prices.BTC.toFixed(2);
-    if (ethEl) ethEl.innerText = "ETH: $" + prices.ETH.toFixed(2);
+    if (btcEl) {
+      btcEl.innerText = "$" + newPrice.toFixed(2);
+
+      if (newPrice > lastPrice) {
+        btcEl.style.color = "#00ff9d";
+      } else if (newPrice < lastPrice) {
+        btcEl.style.color = "#ff4d4d";
+      }
+    }
+
+    prices.BTC = newPrice;
+    lastPrice = newPrice;
 
   } catch (err) {
-    console.log("API failed, keeping last price");
+    console.log("API failed");
+
+    prices.BTC += (Math.random() - 0.5) * 50;
+
+    const btcEl = document.getElementById("price");
+    if (btcEl) {
+      btcEl.innerText = "$" + prices.BTC.toFixed(2);
+    }
   }
 }
 
