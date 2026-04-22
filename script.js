@@ -1,4 +1,3 @@
-<script>
 function login(){
   const user = document.getElementById("user").value.trim();
 
@@ -13,4 +12,3 @@ function login(){
   // redirect safely
   window.location.href = "./dashboard.html";
 }
-</script>
