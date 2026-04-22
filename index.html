@@ -9,19 +9,11 @@
 <div class="box">
   <h1>🔥 ProWallet</h1>
 
-  <input id="user" placeholder="Username">
+  <input id="user" type="text" placeholder="Username">
   <button onclick="login()">Login</button>
 </div>
 
-<script>
-function login(){
-  const user = document.getElementById("user").value;
-  if(!user) return alert("Enter username");
-
-  localStorage.setItem("user", user);
-  window.location.href = "dashboard.html";
-}
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
