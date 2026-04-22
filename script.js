@@ -1,23 +1,16 @@
-document.getElementById("user").innerText =
-  localStorage.getItem("user") || "Guest";
+<script>
+function login(){
+  const user = document.getElementById("user").value.trim();
 
-const priceEl = document.getElementById("price");
-
-// FIXED WebSocket connection
-const ws = new WebSocket(`ws://${window.location.host}`);
-
-ws.onopen = () => {
-  console.log("WebSocket connected");
-};
-
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-
-  if (data.type === "price") {
-    priceEl.innerText = "$" + data.price;
+  if(!user){
+    alert("Enter username");
+    return;
   }
-};
 
-ws.onerror = () => {
-  priceEl.innerText = "Connection error";
-};
+  // save user
+  localStorage.setItem("user", user);
+
+  // redirect safely
+  window.location.href = "./dashboard.html";
+}
+</script>
