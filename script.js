@@ -1,85 +1,63 @@
-console.log("script loaded");
-
-// LOGIN
-function login(){
-  const user = document.getElementById("user").value.trim();
-
-  if(!user || user.length < 3){
-    alert("Username must be at least 3 characters");
-    return;
-  }
-
-  const safeUser = user.replace(/</g, "").replace(/>/g, "");
-
-  localStorage.setItem("user", safeUser);
-  localStorage.setItem("auth", "true");
-
-  window.location.replace("./dashboard.html");
-}
-
-// DASHBOARD CHECK
-window.onload = function(){
-  const auth = localStorage.getItem("auth");
-  const user = localStorage.getItem("user");
-
-  if(window.location.pathname.includes("dashboard.html")){
-    if(auth !== "true" || !user){
-      window.location.replace("./index.html");
-      return;
-    }
-
-    const el = document.getElementById("username");
-    if(el) el.innerText = user;
-  }
-};
-
-// LOGOUT
-function logout(){
-  localStorage.clear();
-  window.location.replace("./index.html");
-}
-// FAKE PRICE ENGINE
-let price = 65000;
+<script>
 let balance = 1000;
+let btcOwned = 0;
+let lastBuyPrice = 0;
 
-function updatePrice(){
-  price += (Math.random() - 0.5) * 500;
+async function getBTCPrice() {
+  let res = await fetch("https://api.coindesk.com/v1/bpi/currentprice/BTC.json");
+  let data = await res.json();
+  let price = data.bpi.USD.rate_float;
 
-  const el = document.getElementById("price");
-  if(el) el.innerText = price.toFixed(2);
+  document.getElementById("price").innerText = price.toFixed(2);
+  return price;
 }
 
-setInterval(updatePrice, 2000);
+async function buyBTC() {
+  let price = await getBTCPrice();
 
-// BUY FUNCTION
-function buy(){
-  if(balance < 100){
-    alert("Not enough balance");
+  if (balance <= 0) {
+    alert("No balance to buy!");
     return;
   }
 
-  balance -= 100;
+  btcOwned = balance / price;
+  lastBuyPrice = price;
+  balance = 0;
 
-  const el = document.getElementById("balance");
-  if(el) el.innerText = balance;
-
-  addHistory("Bought BTC at " + price.toFixed(2));
+  updateUI();
+  addHistory(`🟢 Bought BTC at $${price.toFixed(2)}`);
 }
 
-// SELL FUNCTION
-function sell(){
-  balance += 100;
+async function sellBTC() {
+  let price = await getBTCPrice();
 
-  const el = document.getElementById("balance");
-  if(el) el.innerText = balance;
+  if (btcOwned <= 0) {
+    alert("No BTC to sell!");
+    return;
+  }
 
-  addHistory("Sold BTC at " + price.toFixed(2));
+  let newBalance = btcOwned * price;
+  let profit = newBalance - (btcOwned * lastBuyPrice);
+
+  balance = newBalance;
+  btcOwned = 0;
+
+  updateUI();
+  addHistory(`🔴 Sold BTC at $${price.toFixed(2)} | P/L: $${profit.toFixed(2)}`);
 }
 
-// HISTORY
-function addHistory(text){
-  const div = document.getElementById("history");
-  const p = document.createElement("p");
-  p.innerText = text;
-  div.prepend(p);
+function updateUI() {
+  document.getElementById("balance").innerText = balance.toFixed(2);
 }
+
+function addHistory(text) {
+  let history = document.getElementById("history");
+  let item = document.createElement("p");
+  item.innerText = text;
+  history.prepend(item);
+}
+
+// auto update price every 5 seconds
+setInterval(getBTCPrice, 5000);
+getBTCPrice();
+</script>
