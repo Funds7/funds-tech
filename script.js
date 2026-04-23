@@ -92,5 +92,7 @@ if (user) {
 }
 
 // auto update price
-setInterval(getBTCPrice, 5000);
-getBTCPrice();
+window.addEventListener("load", () => {
+  getBTCPrice();
+  setInterval(getBTCPrice, 5000);
+});
