@@ -17,8 +17,14 @@ input {
 }
 
 button {
+  margin: 5px;
   padding: 10px 20px;
   background: #00c2ff;
   border: none;
+  color: white;
   cursor: pointer;
+}
+
+hr {
+  margin: 15px 0;
 }
