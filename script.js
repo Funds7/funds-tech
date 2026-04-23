@@ -1,3 +1,4 @@
+console.log("script loaded");
 function login(){
   const user = document.getElementById("user").value.trim();
 
