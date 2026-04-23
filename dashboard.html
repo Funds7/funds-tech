@@ -1,7 +1,13 @@
+<!DOCTYPE html>
+<html>
 <head>
   <title>ProBroker Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
+<body>
+
+<div class="box">
 
   <h2>Welcome, <span id="username"></span></h2>
 
@@ -11,8 +17,9 @@
 
   <h3>📈 BTC Price: $<span id="price">Loading...</span></h3>
 
-  <button onclick="buy()">BUY</button>
-  <button onclick="sell()">SELL</button>
+  <!-- ✅ FIXED BUTTONS -->
+  <button onclick="buyBTC()">BUY</button>
+  <button onclick="sellBTC()">SELL</button>
 
   <hr>
 
@@ -22,5 +29,11 @@
   <hr>
 
   <button onclick="logout()">Logout</button>
+
 </div>
+
+<!-- JS must be here -->
 <script src="script.js"></script>
+
+</body>
+</html>
