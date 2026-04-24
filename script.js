@@ -29,10 +29,14 @@ async function getBTCPrice() {
     if (el) el.innerText = price.toFixed(2);
 
     return price;
+
   } catch (error) {
     console.log("Price error:", error);
+
     let el = document.getElementById("price");
-    if (el) el.innerText = "Error";
+    if (el) el.innerText = "Loading...";
+
+    return null;
   }
 }
 
@@ -187,7 +191,7 @@ function startTradingBot() {
     let now = Date.now();
 
     // ⛔ cooldown (important)
-    if (now - lastAction < 45000) return;
+    if (now - lastAction < 30000) return;
 
     // init price
     if (lastSeenPrice === 0) {
@@ -202,7 +206,7 @@ function startTradingBot() {
     if (position.size === 0 && balance >= strategy.tradeAmount) {
 
       // only buy on STRONG dip
-      if (changeFromLast <= -0.8) {
+      if (changeFromLast <= -1.2) {
         console.log("📉 Dip confirmed → BUY");
 
         lastAction = now;
