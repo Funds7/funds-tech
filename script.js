@@ -67,87 +67,88 @@ return null;
 
 // ================= BUY =================
 async function buyBTC() {
-if (actionLock) return;
-actionLock = true;
+  try {
+    if (actionLock) return;
+    actionLock = true;
 
-let price = await getBTCPrice();
-if (!price) {
-actionLock = false;
-return;
-}
+    let price = await getBTCPrice();
+    if (!price) return;
 
-let invest = strategy.tradeAmount;
+    let invest = strategy.tradeAmount;
 
-if (balance < invest) {
-actionLock = false;
-return;
-}
+    if (balance < invest) return;
 
-let fee = invest * FEE_RATE;
-let netInvest = invest - fee;
+    let fee = invest * FEE_RATE;
+    let netInvest = invest - fee;
 
-let btcBought = netInvest / price;
+    let btcBought = netInvest / price;
 
-let totalCost = position.avgPrice * position.size + price * btcBought;
+    let totalCost = position.avgPrice * position.size + price * btcBought;
 
-position.size += btcBought;
-position.avgPrice = totalCost / position.size;
+    position.size += btcBought;
+    position.avgPrice = totalCost / position.size;
 
-balance -= invest;
+    balance -= invest;
 
-addHistory({
-type: "MANUAL",
-side: "BUY",
-amount: btcBought,
-price: price,
-value: invest,
-profit: 0
-});
+    addHistory({
+      type: "MANUAL",
+      side: "BUY",
+      amount: btcBought,
+      price,
+      value: invest,
+      profit: 0
+    });
 
-lastAction = Date.now();
+    lastAction = Date.now();
+    saveData();
 
-saveData();
-actionLock = false;
+  } catch (err) {
+    console.log("BUY error:", err);
+  } finally {
+    actionLock = false; // 🔥 ALWAYS RESET
+  }
 }
 
 // ================= SELL =================
 async function sellBTC() {
-if (actionLock) return;
-actionLock = true;
+  try {
+    if (actionLock) return;
+    actionLock = true;
 
-let price = await getBTCPrice();
-if (!price || position.size <= 0) {
-actionLock = false;
-return;
-}
+    let price = await getBTCPrice();
+    if (!price || position.size <= 0) return;
 
-let amount = position.size;
+    let amount = position.size;
 
-let sellValue = amount * price;
-let fee = sellValue * FEE_RATE;
-let netSell = sellValue - fee;
+    let sellValue = amount * price;
+    let fee = sellValue * FEE_RATE;
+    let netSell = sellValue - fee;
 
-let costValue = amount * position.avgPrice;
-let profit = netSell - costValue;
+    let costValue = amount * position.avgPrice;
+    let profit = netSell - costValue;
 
-balance += netSell;
+    balance += netSell;
 
-addHistory({
-type: "MANUAL",
-side: "SELL",
-amount,
-price,
-value: netSell,
-profit
-});
+    addHistory({
+      type: "MANUAL",
+      side: "SELL",
+      amount,
+      price,
+      value: netSell,
+      profit
+    });
 
-position.size = 0;
-position.avgPrice = 0;
+    position.size = 0;
+    position.avgPrice = 0;
 
-lastAction = Date.now();
+    lastAction = Date.now();
+    saveData();
 
-saveData();
-actionLock = false;
+  } catch (err) {
+    console.log("SELL error:", err);
+  } finally {
+    actionLock = false; // 🔥 ALWAYS RESET
+  }
 }
 
 function deposit() {
