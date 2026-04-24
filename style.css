@@ -27,29 +27,33 @@ h3 {
   border: 1px solid #232a3a;
 }
 
-/* BUTTONS */
+/* BUTTONS (UPGRADED MODERN STYLE) */
 button {
   padding: 10px 15px;
   margin: 5px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  color: white;
   cursor: pointer;
   font-weight: bold;
-  transition: 0.2s;
+  transition: 0.3s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 button:hover {
   transform: scale(1.05);
+  opacity: 0.9;
 }
 
 /* BUY BUTTON */
-button:nth-of-type(1) {
+.buy {
   background: #0ecb81;
   color: black;
 }
 
 /* SELL BUTTON */
-button:nth-of-type(2) {
+.sell {
   background: #f6465d;
   color: white;
 }
