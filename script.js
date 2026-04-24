@@ -1,41 +1,42 @@
-let balance = 1000;
-let btcOwned = 0;
-let lastBuyPrice = 0;
+// ================= LOAD DATA =================
+let balance = Number(localStorage.getItem("balance")) || 1000;
+let btcOwned = Number(localStorage.getItem("btc")) || 0;
+let lastBuyPrice = Number(localStorage.getItem("lastPrice")) || 0;
+let historyData = JSON.parse(localStorage.getItem("history")) || [];
 
+// ================= PRICE =================
 async function getBTCPrice() {
-  let res = await fetch("https://api.coindesk.com/v1/bpi/currentprice/BTC.json");
-  let data = await res.json();
-  let price = data.bpi.USD.rate_float;
+  try {
+    let res = await fetch("https://api.coindesk.com/v1/bpi/currentprice/BTC.json");
+    let data = await res.json();
+    let price = data.bpi.USD.rate_float;
 
-  let priceEl = document.getElementById("price");
-  if (priceEl) priceEl.innerText = price.toFixed(2);
+    let el = document.getElementById("price");
+    if (el) el.innerText = price.toFixed(2);
 
-  return price;
+    return price;
+  } catch {
+    console.log("Price failed");
+  }
 }
 
+// ================= BUY =================
 async function buyBTC() {
   let price = await getBTCPrice();
-
-  if (balance <= 0) {
-    alert("No balance to buy!");
-    return;
-  }
+  if (!price || balance <= 0) return alert("Cannot buy");
 
   btcOwned = balance / price;
   lastBuyPrice = price;
   balance = 0;
 
-  updateUI();
+  saveData();
   addHistory(`🟢 Bought BTC at $${price.toFixed(2)}`);
 }
 
+// ================= SELL =================
 async function sellBTC() {
   let price = await getBTCPrice();
-
-  if (btcOwned <= 0) {
-    alert("No BTC to sell!");
-    return;
-  }
+  if (!price || btcOwned <= 0) return alert("No BTC");
 
   let newBalance = btcOwned * price;
   let profit = newBalance - (btcOwned * lastBuyPrice);
@@ -43,56 +44,64 @@ async function sellBTC() {
   balance = newBalance;
   btcOwned = 0;
 
-  updateUI();
+  saveData();
   addHistory(`🔴 Sold BTC at $${price.toFixed(2)} | P/L: $${profit.toFixed(2)}`);
 }
 
+// ================= SAVE =================
+function saveData() {
+  localStorage.setItem("balance", balance);
+  localStorage.setItem("btc", btcOwned);
+  localStorage.setItem("lastPrice", lastBuyPrice);
+  localStorage.setItem("history", JSON.stringify(historyData));
+  updateUI();
+}
+
+// ================= UI =================
 function updateUI() {
-  let balEl = document.getElementById("balance");
-  if (balEl) balEl.innerText = balance.toFixed(2);
-}
+  let bal = document.getElementById("balance");
+  if (bal) bal.innerText = balance.toFixed(2);
 
-function addHistory(text) {
-  let history = document.getElementById("history");
-  if (!history) return;
-
-  let item = document.createElement("p");
-  item.innerText = text;
-  history.prepend(item);
-}
-
-// ================= LOGIN SYSTEM =================
-
-function login() {
-  let usernameInput = document.getElementById("usernameInput");
-
-  if (!usernameInput) return;
-
-  let username = usernameInput.value;
-
-  if (username === "") {
-    alert("Enter username");
-    return;
+  let hist = document.getElementById("history");
+  if (hist) {
+    hist.innerHTML = "";
+    historyData.forEach(h => {
+      let p = document.createElement("p");
+      p.innerText = h;
+      hist.appendChild(p);
+    });
   }
+}
 
-  localStorage.setItem("user", username);
+// ================= HISTORY =================
+function addHistory(text) {
+  historyData.unshift(text);
+  saveData();
+}
+
+// ================= LOGIN =================
+function login() {
+  let input = document.getElementById("usernameInput");
+  if (!input || input.value === "") return alert("Enter username");
+
+  localStorage.setItem("user", input.value);
   window.location.href = "dashboard.html";
 }
 
+// ================= LOGOUT =================
 function logout() {
-  localStorage.removeItem("user");
+  localStorage.clear();
   window.location.href = "index.html";
 }
 
-// show username on dashboard
-let user = localStorage.getItem("user");
-if (user) {
-  let el = document.getElementById("username");
-  if (el) el.innerText = user;
-}
-
-// auto update price
+// ================= INIT =================
 window.addEventListener("load", () => {
+  let user = localStorage.getItem("user");
+
+  let nameEl = document.getElementById("username");
+  if (user && nameEl) nameEl.innerText = user;
+
+  updateUI();
   getBTCPrice();
   setInterval(getBTCPrice, 5000);
 });
