@@ -31,7 +31,6 @@ async function getBTCPrice() {
     return price;
   } catch (error) {
     console.log("Price error:", error);
-
     let el = document.getElementById("price");
     if (el) el.innerText = "Error";
   }
@@ -47,17 +46,17 @@ async function buyBTC() {
 
   let btcBought = invest / price;
 
-  position.avgPrice =
-    (position.avgPrice * position.size + price * btcBought) /
-    (position.size + btcBought);
+  let totalCost = position.avgPrice * position.size + price * btcBought;
 
   position.size += btcBought;
+  position.avgPrice = totalCost / position.size;
+
   balance -= invest;
 
   lastAction = Date.now();
 
-  saveData();
   addHistory(`🟢 BUY ${btcBought.toFixed(6)} BTC @ $${price.toFixed(2)}`);
+  saveData();
 }
 
 // ================= SELL =================
@@ -65,17 +64,19 @@ async function sellBTC() {
   let price = await getBTCPrice();
   if (!price || position.size <= 0) return;
 
-  let sellValue = position.size * price;
-  let costValue = position.size * position.avgPrice;
+  let amount = position.size;
+
+  let sellValue = amount * price;
+  let costValue = amount * position.avgPrice;
 
   let profit = sellValue - costValue;
 
   balance += sellValue;
 
   addHistory(
-    `🔴 SELL ${position.size.toFixed(6)} BTC @ $${price.toFixed(2)} | P/L: ${
+    `🔴 SELL ${amount.toFixed(6)} BTC @ $${price.toFixed(2)} | P/L: ${
       profit >= 0 ? "+" : ""
-    }$${profit.toFixed(2)}`
+    }$${(Math.round(profit * 100) / 100).toFixed(2)}`
   );
 
   position.size = 0;
@@ -112,38 +113,39 @@ function updateUI() {
     });
   }
 }
+
+// ================= PROFIT =================
 function updateProfitDashboard(price) {
   if (!price || position.size === 0) {
-    let plEl = document.getElementById("profit");
-    if (plEl) plEl.innerText = "0.00";
-
-    let pctEl = document.getElementById("profitPercent");
-    if (pctEl) pctEl.innerText = "0%";
-
-    let totalEl = document.getElementById("totalValue");
-    if (totalEl) totalEl.innerText = balance.toFixed(2);
-
+    document.getElementById("profit").innerText = "0.00";
+    document.getElementById("profitPercent").innerText = "0%";
+    document.getElementById("totalValue").innerText = balance.toFixed(2);
     return;
   }
 
   let entry = position.avgPrice;
-  let change = entry ? ((price - entry) / entry) * 100 : 0;
+
+  let change = ((price - entry) / entry) * 100;
 
   let positionValue = position.size * price;
   let entryValue = position.size * entry;
 
   let unrealizedPL = positionValue - entryValue;
 
-  let totalValue = balance + positionValue;
+  document.getElementById("profit").innerText =
+    (Math.round(unrealizedPL * 100) / 100).toFixed(2);
 
-  document.getElementById("profit").innerText = unrealizedPL.toFixed(2);
-  document.getElementById("profitPercent").innerText = change.toFixed(2) + "%";
-  document.getElementById("totalValue").innerText = totalValue.toFixed(2);
+  document.getElementById("profitPercent").innerText =
+    change.toFixed(2) + "%";
+
+  document.getElementById("totalValue").innerText =
+    (balance + positionValue).toFixed(2);
 }
+
 // ================= HISTORY =================
 function addHistory(text) {
   historyData.unshift(text);
-  saveData();
+  if (historyData.length > 50) historyData.pop();
 }
 
 // ================= LOGIN =================
@@ -161,13 +163,8 @@ function logout() {
   window.location.href = "index.html";
 }
 
-// ================= INIT + BOT =================
+// ================= INIT =================
 window.addEventListener("load", () => {
-  position = JSON.parse(localStorage.getItem("position")) || {
-    size: 0,
-    avgPrice: 0
-  };
-
   let user = localStorage.getItem("user");
   let nameEl = document.getElementById("username");
   if (user && nameEl) nameEl.innerText = user;
@@ -176,10 +173,9 @@ window.addEventListener("load", () => {
   getBTCPrice();
 
   startTradingBot();
-
 });
 
-// ================= TRADING BOT =================
+// ================= BOT =================
 function startTradingBot() {
   if (tradingInterval) clearInterval(tradingInterval);
 
@@ -187,8 +183,8 @@ function startTradingBot() {
     let price = await getBTCPrice();
     if (!price) return;
 
-  updateProfitDashboard(price);
-    
+    updateProfitDashboard(price);
+
     let now = Date.now();
 
     if (now - lastAction < 10000) return;
@@ -198,18 +194,12 @@ function startTradingBot() {
       return;
     }
 
-    // ENTRY
     if (position.size === 0) {
-      let dipBuy = price < lastSeenPrice * 0.998;
-
-      if (dipBuy) {
+      if (price < lastSeenPrice * 0.998) {
         lastAction = now;
         await buyBTC();
       }
-    }
-
-    // EXIT
-    else {
+    } else {
       let change =
         ((price - position.avgPrice) / position.avgPrice) * 100;
 
@@ -224,4 +214,4 @@ function startTradingBot() {
 
     lastSeenPrice = price;
   }, 10000);
-      }
+    }
