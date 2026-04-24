@@ -1,49 +1,64 @@
-// ================= LOAD DATA =================
+let strategy = {
+  takeProfit: 0.5,
+  stopLoss: 0.3,
+  tradeAmount: 100
+};
+
 let balance = Number(localStorage.getItem("balance")) || 1000;
-let btcOwned = Number(localStorage.getItem("btc")) || 0;
-let lastBuyPrice = Number(localStorage.getItem("lastPrice")) || 0;
-let historyData = JSON.parse(localStorage.getItem("history")) || [];
+
 let position = JSON.parse(localStorage.getItem("position")) || {
   size: 0,
   avgPrice: 0
 };
+
+let historyData = JSON.parse(localStorage.getItem("history")) || [];
+
+let lastAction = 0;
+let lastSeenPrice = 0;
+
+let tradingInterval = null; // ✅ correct
+
 // ================= PRICE =================
 async function getBTCPrice() {
-  try {
-    let res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
-    let data = await res.json();
+try {
+let res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
+let data = await res.json();
 
-    let price = parseFloat(data.price);
+let price = parseFloat(data.price);  
 
-    let el = document.getElementById("price");
-    if (el) el.innerText = price.toFixed(2);
+let el = document.getElementById("price");  
+if (el) el.innerText = price.toFixed(2);  
 
-    return price;
+return price;
 
-  } catch (error) {
-    console.log("Price error:", error);
+} catch (error) {
+console.log("Price error:", error);
 
-    let el = document.getElementById("price");
-    if (el) el.innerText = "Error";
-  }
+let el = document.getElementById("price");  
+if (el) el.innerText = "Error";
+
+}
 }
 
 // ================= BUY =================
 async function buyBTC() {
   let price = await getBTCPrice();
+  if (!price) return;
 
-  let invest = balance * 0.2; // 20% per trade
-  if (invest < 1) return alert("Not enough balance");
+  let invest = strategy.tradeAmount;
+
+  if (balance < invest) return;
 
   let btcBought = invest / price;
 
-  // update average price (REAL TRADING LOGIC)
   position.avgPrice =
     (position.avgPrice * position.size + price * btcBought) /
     (position.size + btcBought);
 
   position.size += btcBought;
   balance -= invest;
+
+  lastAction = Date.now(); // FIX
 
   saveData();
   addHistory(`🟢 BUY ${btcBought.toFixed(6)} BTC @ $${price.toFixed(2)}`);
@@ -52,13 +67,14 @@ async function buyBTC() {
 // ================= SELL =================
 async function sellBTC() {
   let price = await getBTCPrice();
-
-  if (position.size <= 0) return alert("No position");
+  if (!price || position.size <= 0) return;
 
   let sellValue = position.size * price;
   let costValue = position.size * position.avgPrice;
 
   let profit = sellValue - costValue;
+
+  balance += sellValue;
 
   addHistory(
     `🔴 SELL ${position.size.toFixed(6)} BTC @ $${price.toFixed(2)} | P/L: ${
@@ -66,64 +82,64 @@ async function sellBTC() {
     }$${profit.toFixed(2)}`
   );
 
-  // RESET POSITION FIRST
   position.size = 0;
   position.avgPrice = 0;
 
-  balance += sellValue;
+  lastAction = Date.now();
 
   saveData();
-  updateUI();
 }
+
 
 // ================= SAVE =================
 function saveData() {
-  localStorage.setItem("balance", balance);
-  localStorage.setItem("history", JSON.stringify(historyData));
-  localStorage.setItem("position", JSON.stringify(position));
-  updateUI();
+localStorage.setItem("balance", balance);
+localStorage.setItem("history", JSON.stringify(historyData));
+localStorage.setItem("position", JSON.stringify(position));
+updateUI();
 }
 
 // ================= UI =================
 function updateUI() {
-  document.getElementById("balance").innerText = balance.toFixed(2);
+document.getElementById("balance").innerText = balance.toFixed(2);
 
-  let btcEl = document.getElementById("btc");
-  if (btcEl) btcEl.innerText = position.size.toFixed(6);
+let btcEl = document.getElementById("btc");
+if (btcEl) btcEl.innerText = position.size.toFixed(6);
 
-  let hist = document.getElementById("history");
-  if (hist) {
-    hist.innerHTML = "";
-    historyData.forEach(h => {
-      let p = document.createElement("p");
-      p.innerText = h;
-      hist.appendChild(p);
-    });
-  }
+let hist = document.getElementById("history");
+if (hist) {
+hist.innerHTML = "";
+historyData.forEach(h => {
+let p = document.createElement("p");
+p.innerText = h;
+hist.appendChild(p);
+});
+}
 }
 
 // ================= HISTORY =================
 function addHistory(text) {
-  historyData.unshift(text);
-  saveData();
+historyData.unshift(text);
+saveData();
 }
 
 // ================= LOGIN =================
 function login() {
-  let input = document.getElementById("usernameInput");
-  if (!input || input.value === "") return alert("Enter username");
+let input = document.getElementById("usernameInput");
+if (!input || input.value === "") return alert("Enter username");
 
-  localStorage.setItem("user", input.value);
-  window.location.href = "dashboard.html";
+localStorage.setItem("user", input.value);
+window.location.href = "dashboard.html";
 }
 
 // ================= LOGOUT =================
 function logout() {
-  localStorage.removeItem("user");
-  window.location.href = "index.html";
+localStorage.removeItem("user");
+window.location.href = "index.html";
 }
 
-// ================= INIT ====================
+// ================= INIT + TRADING BOT ====================
+
 window.addEventListener("load", () => {
   position = JSON.parse(localStorage.getItem("position")) || {
     size: 0,
@@ -136,5 +152,52 @@ window.addEventListener("load", () => {
 
   updateUI();
   getBTCPrice();
+
+  startTradingBot(); // 🚀 start bot
+
   setInterval(getBTCPrice, 5000);
 });
+
+function startTradingBot() {
+  if (tradingInterval) clearInterval(tradingInterval);
+
+  tradingInterval = setInterval(async () => {
+    let price = await getBTCPrice();
+    if (!price) return;
+
+    let now = Date.now();
+
+    if (now - lastAction < 15000) return;
+
+    if (lastSeenPrice === 0) {
+      lastSeenPrice = price;
+      return;
+    }
+
+    // ENTRY
+    if (position.size === 0) {
+      let dipBuy = price < lastSeenPrice * 0.998;
+
+      if (dipBuy) {
+        lastAction = now;
+        await buyBTC();
+      }
+    }
+
+    // EXIT
+    else {
+      let change =
+        ((price - position.avgPrice) / position.avgPrice) * 100;
+
+      if (
+        change >= strategy.takeProfit ||
+        change <= -strategy.stopLoss
+      ) {
+        lastAction = now;
+        await sellBTC();
+      }
+    }
+
+    lastSeenPrice = price;
+  }, 10000);
+}
