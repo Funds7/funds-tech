@@ -91,6 +91,47 @@ async function sellBTC() {
   saveData();
 }
 
+function deposit() {
+  let amount = prompt("Enter deposit amount:");
+
+  amount = Number(amount);
+
+  if (!amount || amount <= 0) return alert("Invalid amount");
+
+  balance += amount;
+
+  addHistory(`💰 DEPOSIT +$${amount.toFixed(2)}`);
+  saveData();
+}
+
+function withdraw() {
+  let amount = prompt("Enter withdraw amount:");
+
+  amount = Number(amount);
+
+  if (!amount || amount <= 0) return alert("Invalid amount");
+
+  if (amount > balance) return alert("Not enough balance");
+
+  balance -= amount;
+
+  addHistory(`🏧 WITHDRAW -$${amount.toFixed(2)}`);
+  saveData();
+}
+
+function transfer() {
+  let amount = Number(prompt("Enter transfer amount:"));
+  let user = prompt("Enter receiver name:");
+
+  if (!amount || isNaN(amount) || amount <= 0) return alert("Invalid amount");
+  if (!user) return alert("Enter receiver");
+  if (amount > balance) return alert("Not enough balance");
+
+  balance -= amount;
+
+  addHistory(`🔁 TRANSFER -$${amount.toFixed(2)} → ${user}`);
+  saveData();
+}
 // ================= SAVE =================
 function saveData() {
   localStorage.setItem("balance", balance);
@@ -183,10 +224,14 @@ function startTradingBot() {
   if (tradingInterval) clearInterval(tradingInterval);
 
   tradingInterval = setInterval(async () => {
-    let price = await getBTCPrice();
-    if (!price) return;
+  let price = await getBTCPrice();
 
-    updateProfitDashboard(price);
+  if (!price) {
+    lastSeenPrice = 0;
+    return;
+  }
+
+  updateProfitDashboard(price);
 
     let now = Date.now();
 
