@@ -46,11 +46,17 @@ async function sellBTC() {
   let newBalance = btcOwned * price;
   let profit = newBalance - (btcOwned * lastBuyPrice);
 
+  // update values
   balance = newBalance;
   btcOwned = 0;
 
+  // format profit
+  let profitText = profit >= 0 
+    ? `+$${profit.toFixed(2)}`
+    : `-$${Math.abs(profit).toFixed(2)}`;
+
   saveData();
-  addHistory(`🔴 Sold BTC at $${price.toFixed(2)} | P/L: $${profit.toFixed(2)}`);
+  addHistory(`🔴 Sold BTC at $${price.toFixed(2)} | P/L: ${profitText}`);
 }
 
 // ================= SAVE =================
@@ -66,6 +72,9 @@ function saveData() {
 function updateUI() {
   let bal = document.getElementById("balance");
   if (bal) bal.innerText = balance.toFixed(2);
+
+  let btcEl = document.getElementById("btc");
+  if (btcEl) btcEl.innerText = btcOwned.toFixed(6);
 
   let hist = document.getElementById("history");
   if (hist) {
@@ -95,7 +104,7 @@ function login() {
 
 // ================= LOGOUT =================
 function logout() {
-  localStorage.clear();
+  localStorage.removeItem("user");
   window.location.href = "index.html";
 }
 
