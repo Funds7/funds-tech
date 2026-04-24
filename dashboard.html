@@ -1,39 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ProBroker Dashboard</title>
+  <title>ProWallet Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="box">
 
   <h2>Welcome, <span id="username"></span></h2>
 
-  <hr>
-
-  <h3>💰 Balance: $<span id="balance">1000</span></h3>
-
+  <h3>💰 Balance: $<span id="balance"></span></h3>
   <h3>📈 BTC Price: $<span id="price">Loading...</span></h3>
 
-  <!-- ✅ FIXED BUTTONS -->
   <button onclick="buyBTC()">BUY</button>
   <button onclick="sellBTC()">SELL</button>
 
-  <hr>
-
   <h3>📜 History</h3>
   <div id="history"></div>
-
-  <hr>
 
   <button onclick="logout()">Logout</button>
 
 </div>
 
-<!-- JS must be here -->
 <script src="script.js"></script>
-
 </body>
 </html>
