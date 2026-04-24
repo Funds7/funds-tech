@@ -10,23 +10,25 @@
 
   <h2>Welcome, <span id="username"></span></h2>
 
-  <h3>💰 Balance: $<span id="balance"></span></h3>
-  <h3>🪙 BTC Owned: <span id="btc"></span></h3>
- 
-  <h3>📈 BTC Price: $<span id="price">Loading...</span></h3>
-<h3>💼 Total Value: $<span id="totalValue"></span></h3>
+  <h3>💰 Balance: $<span id="balance">0.00</span></h3>
 
-  <h3>📊 P/L: $<span id="profit"></span> (<span id="profitPercent"></span>)</h3>
+<h3>🪙 BTC Owned: <span id="btc">0.000000</span></h3>
+
+<h3>📈 BTC Price: $<span id="price">Loading...</span></h3>
+
+<h3>💼 Total Value: $<span id="totalValue">0.00</span></h3>
+
+<h3>📊 P/L: $<span id="profit">0.00</span> (<span id="profitPercent">0%</span>)</h3>
   <h3>📊 Live BTC Chart</h3>
   <div id="chart" style="height:400px;"></div>
 
-  <button onclick="buyBTC()">BUY</button>
-  <button onclick="sellBTC()">SELL</button>
+  <button class="buy" onclick="buyBTC()">BUY</button>
+<button class="sell" onclick="sellBTC()">SELL</button>
 
   <h3>📜 History</h3>
   <div id="history"></div>
 
-  <button onclick="logout()">Logout</button>
+  <button onclick="logout()" style="background:#f6465d">Logout</button>
 
 </div>
 
