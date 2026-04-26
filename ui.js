@@ -67,3 +67,29 @@ change.toFixed(2) + "%";
 document.getElementById("totalValue").innerText =
 (balance + positionValue).toFixed(2);
 }
+// ================= LOGIN =================
+function login() {
+let input = document.getElementById("usernameInput");
+if (!input || input.value === "") return alert("Enter username");
+
+localStorage.setItem("user", input.value);
+window.location.href = "dashboard.html";
+}
+
+// ================= LOGOUT =================
+function logout() {
+localStorage.removeItem("user");
+window.location.href = "index.html";
+}
+
+// ================= INIT =================
+window.addEventListener("load", () => {
+let user = localStorage.getItem("user");
+let nameEl = document.getElementById("username");
+if (user && nameEl) nameEl.innerText = user;
+
+updateUI();
+getBTCPrice();
+
+botLoop();
+});
